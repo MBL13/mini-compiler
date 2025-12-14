@@ -12,8 +12,6 @@ O compilador foi concebido de forma **modular**, sendo dividido em **três módu
 
 Cada módulo desempenha um papel específico no processo de análise e execução do código-fonte, seguindo a arquitectura clássica de compiladores.
 
-Este projecto é especialmente indicado para fins **académicos**, como apoio ao ensino de **Compiladores**, **Linguagens Formais** e **Estruturas de Linguagens de Programação**, podendo também servir como base para projectos mais avançados.
-
 ---
 
 ## 🎯 Objectivos do Projecto
@@ -114,9 +112,6 @@ Este mini compilador **não tem como objectivo competir com compiladores reais**
 
 ## 👨‍💻 Público-Alvo
 
-* Estudantes de Ciência da Computação
 * Estudantes de Engenharia Informática
-* Docentes e investigadores
-* Entusiastas de linguagens de programação
 
 ---
