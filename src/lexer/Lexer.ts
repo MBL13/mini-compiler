@@ -33,6 +33,20 @@ class Lexer{
                 this.advance();
                 return {type: TokenType.PLUS, value: "+"}
             }
+             if(char === "/"){
+                this.advance();
+                return {type: TokenType.DIVIDED, value: "/"}
+            }
+
+               if(char === "*"){
+                this.advance();
+                return {type: TokenType.MULT, value: "*"}
+            }
+
+               if(char === "-"){
+                this.advance();
+                return {type: TokenType.MINUS, value: "-"}
+            }
 
              if(char === "="){
                 this.advance();

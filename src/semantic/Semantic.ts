@@ -30,7 +30,17 @@ class SemanticAnalyzer {
             }
             return this.simbols[node.name];
         case "BinaryExpression":
-            return this.visit(node.left) + this.visit(node.right);
+                switch(node.operator){
+                    case "+" : return this.visit(node.left) + this.visit(node.right);
+                    case "-" : return this.visit(node.left) - this.visit(node.right);
+                    case "*" : return this.visit(node.left) * this.visit(node.right);
+                    case "/" : 
+                            if(this.visit(node.right) === 0){
+                                throw new Error(`Expressão mal definida: ${this.visit(node.left)} ${node.operator} ${this.visit(node.right)} . Não é possível dividir por zero`);
+                            }
+                            return this.visit(node.left) / this.visit(node.right);
+                }
+            break; 
      
     }
   }

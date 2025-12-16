@@ -1,13 +1,13 @@
 import Lexer from "./lexer/Lexer";
 import Parser from "./parser/Parser";
 import SemanticAnalyzer from "./semantic/Semantic";
+import fs from "fs";
+import path from "path";
 
 
-const code = `
-    let x = 5;
-    let y = x + 3;
-    print y;
-`;
+const filePath = path.join(__dirname, "input", "code.nt");
+const code = fs.readFileSync(filePath, "utf-8");
+
 const lexer = new Lexer(code);
 const parser = new Parser(lexer);
 const ast = parser.parse();

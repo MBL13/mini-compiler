@@ -45,6 +45,40 @@ class Parser {
                 right: this.factor()
             }
         }
+
+         while(this.currentToken.type === TokenType.DIVIDED){
+            this.eat(TokenType.DIVIDED);
+            node = {
+                type: "BinaryExpression",
+                operator: "/",
+                left: node,
+                right: this.factor()
+            }
+        }
+
+         while(this.currentToken.type === TokenType.MULT){
+            this.eat(TokenType.MULT);
+            node = {
+                type: "BinaryExpression",
+                operator: "*",
+                left: node,
+                right: this.factor()
+            }
+        }
+
+         while(this.currentToken.type === TokenType.MINUS){
+         
+            this.eat(TokenType.MINUS);
+            node = {
+                type: "BinaryExpression",
+                operator: "-",
+                left: node,
+                right: this.factor()
+            }
+        }
+
+
+
             return node;
     }
     
