@@ -14,4 +14,5 @@ interface Token {
     type : TokenType,
     value : string
 }
+
 export { Token, TokenType}

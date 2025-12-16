@@ -1,7 +1,8 @@
 import { Token, TokenType } from "./ILexer";
 
 
-class Lexer {
+class Lexer{
+
     private text : string;
     private position : number = 0;
 
@@ -53,7 +54,7 @@ class Lexer {
 
             if(isWord.test(char)){
                 let word = "";
-                while(isNumber.test(this.peek())){
+                while(isWord.test(this.peek())){
                     word += this.peek();
                     this.advance();
                 }
@@ -70,3 +71,5 @@ class Lexer {
     }
 
 }
+
+export default Lexer;
