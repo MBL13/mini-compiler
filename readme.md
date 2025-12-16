@@ -1,7 +1,5 @@
 # 🧠 Mini Compilador em Node.js + TypeScript
 
-## 📌 Descrição do Projecto
-
 Este projecto consiste no desenvolvimento de um **mini compilador**, implementado em **Node.js utilizando TypeScript**, com o objectivo de demonstrar, de forma prática e didáctica, os principais conceitos envolvidos no processo de compilação de uma linguagem de programação.
 
 O compilador foi concebido de forma **modular**, sendo dividido em **três módulos fundamentais**:
