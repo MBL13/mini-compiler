@@ -9,6 +9,9 @@ aproximar de linguagens modernas e preparar o compilador para
 
 ---
 
+## 0. Input
+- Mudamos o nome do arquivo de entrada de .nt para .sa
+
 ## 1. ILexer
 
 ### Alterações

@@ -15,7 +15,7 @@ import path from "path";
  */
 
 // Caminho do arquivo de entrada (.nt)
-const filePath = path.join(__dirname, "input", "code.nt");
+const filePath = path.join(__dirname, "input", "code.sa");
 const code = fs.readFileSync(filePath, "utf-8");
 
 // 1. Instância do Lexer com o código bruto
