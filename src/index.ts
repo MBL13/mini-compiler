@@ -19,12 +19,16 @@ const filePath = path.join(__dirname, "input", "code.nt");
 const code = fs.readFileSync(filePath, "utf-8");
 
 // 1. Instância do Lexer com o código bruto
-const lexer = new Lexer(code);
+try {
+    const lexer = new Lexer(code);
 
-// 2. Instância do Parser que consome o Lexer para gerar a AST
-const parser = new Parser(lexer);
-const ast = parser.parse();
+    // 2. Instância do Parser que consome o Lexer para gerar a AST
+    const parser = new Parser(lexer);
+    const ast = parser.parse();
 
-// 3. Instância do Analisador Semântico que executa a AST gerada
-const semantic = new SemanticAnalyzer();
-semantic.execute(ast);
+    // 3. Instância do Analisador Semântico que executa a AST gerada
+    const semantic = new SemanticAnalyzer();
+    semantic.execute(ast);
+} catch (error: any) {
+    console.error(error.message);
+}
