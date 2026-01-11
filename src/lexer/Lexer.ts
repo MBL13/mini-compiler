@@ -215,6 +215,23 @@ class Lexer {
                 if (word === "NATURAL") return { type: TokenType.NATURAL, value: word, linha: tokenInicioLinha, coluna: tokenInicioColuna };
                 if (word === "TEXTO") return { type: TokenType.TEXTO, value: word, linha: tokenInicioLinha, coluna: tokenInicioColuna };
 
+                // Validação de palavras reservadas "sujas" (ex: VARc, REALx)
+                const keywords = ["VAR", "EXIBIR", "INTEIRO", "REAL", "NATURAL", "TEXTO"];
+                for (const kw of keywords) {
+                    if (word.startsWith(kw)) {
+                        throw new Error(
+                            `\x1b[31m========================================\x1b[0m
+\x1b[31m[ERRO] Palavra reservada inválida\x1b[0m
+\x1b[31m========================================\x1b[0m
+\x1b[1mDetalhes:\x1b[0m
+  - \x1b[36mArquivo:\x1b[0m \x1b[33m${this.filename}\x1b[0m
+  - \x1b[36mLinha:\x1b[0m \x1b[33m${tokenInicioLinha}\x1b[0m
+  - \x1b[36mColuna:\x1b[0m \x1b[33m${tokenInicioColuna}\x1b[0m
+  - \x1b[36mContexto:\x1b[0m A palavra '\x1b[33m${word}\x1b[0m' parece uma palavra reservada mal formada.`
+                        );
+                    }
+                }
+
                 // Se não for palavra-chave, é um identificador (nome de variável)
                 return { type: TokenType.IDENTIFICADOR, value: word, linha: tokenInicioLinha, coluna: tokenInicioColuna };
             }
