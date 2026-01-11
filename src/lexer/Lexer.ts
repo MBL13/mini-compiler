@@ -39,6 +39,10 @@ class Lexer {
         this.errors.push(message);
     }
 
+    private peekNext(): string {
+        return this.text[this.position + 1] || "";
+    }
+
     /**
      * Analisa o texto e retorna o próximo token encontrado.
      */
@@ -74,7 +78,51 @@ class Lexer {
                     coluna: tokenInicioColuna,
                 };
             }
+
+            // Comentários de bloco e divisão
             if (char === "/") {
+                // Verifica se é um comentário de bloco /* ... */
+                if (this.peekNext() === "*") {
+                    const commentStartLine = this.linha;
+                    const commentStartColumn = this.coluna;
+
+                    this.advance(); // Consome '/'
+                    this.advance(); // Consome '*'
+
+                    let closed = false;
+                    // Procura pelo fechamento */
+                    while (this.position < this.text.length) {
+                        if (this.peek() === "*" && this.peekNext() === "/") {
+                            this.advance(); // Consome '*'
+                            this.advance(); // Consome '/'
+                            closed = true;
+                            break; // Sai do loop de comentário
+                        }
+
+                        if (this.peek() === "\n") {
+                            this.avancaLinha();
+                        } else {
+                            this.advance();
+                        }
+                    }
+
+                    // Se chegou aqui e o comentário não foi fechado (EOF), adiciona erro
+                    if (!closed) {
+                        this.addError(
+                            `\x1b[31m========================================\x1b[0m
+\x1b[31m[ERRO] Comentário em bloco não fechado\x1b[0m
+\x1b[31m========================================\x1b[0m
+\x1b[1mDetalhes:\x1b[0m
+  - \x1b[36mArquivo:\x1b[0m \x1b[33m${this.filename}\x1b[0m
+  - \x1b[36mLinha:\x1b[0m \x1b[33m${commentStartLine}\x1b[0m
+  - \x1b[36mColuna:\x1b[0m \x1b[33m${commentStartColumn}\x1b[0m
+  - \x1b[36mContexto:\x1b[0m Comentário iniciado com /* mas não terminado com */`
+                        );
+                    }
+                    continue; // Ignora o comentário e continua a procurar o próximo token
+                }
+
+                // Se não for comentário, é operador de divisão
                 this.advance();
                 return {
                     type: TokenType.DIVISAO,
@@ -104,7 +152,7 @@ class Lexer {
                 };
             }
 
-            if (char === "=") {
+            if (char === "=" && this.peekNext() !== "=") {
                 this.advance();
                 return {
                     type: TokenType.ATRIBUICAO,
@@ -117,7 +165,7 @@ class Lexer {
             if (char === ".") {
                 this.advance();
                 return {
-                    type: TokenType.SEMICOLON,
+                    type: TokenType.PONTO,
                     value: ".",
                     linha: tokenInicioLinha,
                     coluna: tokenInicioColuna,
@@ -152,36 +200,128 @@ class Lexer {
                     coluna: tokenInicioColuna,
                 };
             }
-             if (char === "{") {
+            if (char === "{") {
                 this.advance();
                 return {
                     type: TokenType.CHAVE_ESQUERDA,
-                    value: ")",
+                    value: "{",
                     linha: tokenInicioLinha,
                     coluna: tokenInicioColuna,
                 };
             }
 
-             if (char === "}") {
+            if (char === "}") {
                 this.advance();
                 return {
                     type: TokenType.CHAVE_DIREITA,
-                    value: ")",
+                    value: "}",
                     linha: tokenInicioLinha,
                     coluna: tokenInicioColuna,
                 };
             }
+
+            // Operadores de comparação
+
+            if (char === "=" && this.peekNext() === "=") {
+                this.advance();
+                this.advance();
+                return {
+                    type: TokenType.IGUALDADE,
+                    value: "==",
+                    linha: tokenInicioLinha,
+                    coluna: tokenInicioColuna,
+                };
+            }
+
+            if (char === "!" && this.peekNext() === "=") {
+                this.advance();
+                this.advance();
+                return {
+                    type: TokenType.DIFERENTE_DE,
+                    value: "!=",
+                    linha: tokenInicioLinha,
+                    coluna: tokenInicioColuna,
+                };
+            }
+
+            if (char === ">" && this.peekNext() === "=") {
+                this.advance();
+                this.advance();
+                return {
+                    type: TokenType.MAIOR_OU_IGUAL,
+                    value: ">=",
+                    linha: tokenInicioLinha,
+                    coluna: tokenInicioColuna,
+                };
+            }
+
+            if (char === "<" && this.peekNext() === "=") {
+                this.advance();
+                this.advance();
+                return {
+                    type: TokenType.MENOR_OU_IGUAL,
+                    value: "<=",
+                    linha: tokenInicioLinha,
+                    coluna: tokenInicioColuna,
+                };
+            }
+
+            if (char === "<") {
+                this.advance();
+                return {
+                    type: TokenType.MENOR_QUE,
+                    value: "<",
+                    linha: tokenInicioLinha,
+                    coluna: tokenInicioColuna,
+                };
+            }
+
+            if (char === ">") {
+                this.advance();
+                return {
+                    type: TokenType.MAIOR_QUE,
+                    value: ">",
+                    linha: tokenInicioLinha,
+                    coluna: tokenInicioColuna,
+                };
+            }
+
+            // Capturar textos entre aspas duplas
 
             if (char === '"') {
                 this.advance(); // Consome aspas iniciais
                 let str = "";
                 const startLine = this.linha;
                 const startColumn = this.coluna;
+                const MAX_STRING_LENGTH = 500; // Limite de caracteres para strings
 
                 while (this.peek() !== '"' && this.position < this.text.length) {
                     if (this.peek() === "\n") {
                         this.avancaLinha();
                     } else {
+                        // Validação: string muito grande
+                        if (str.length >= MAX_STRING_LENGTH) {
+                            this.addError(
+                                `\x1b[31m========================================\x1b[0m
+\x1b[31m[ERRO] String muito grande\x1b[0m
+\x1b[31m========================================\x1b[0m
+\x1b[1mDetalhes:\x1b[0m
+  - \x1b[36mArquivo:\x1b[0m \x1b[33m${this.filename}\x1b[0m
+  - \x1b[36mLinha:\x1b[0m \x1b[33m${startLine}\x1b[0m
+  - \x1b[36mColuna:\x1b[0m \x1b[33m${startColumn}\x1b[0m
+  - \x1b[36mContexto:\x1b[0m A string excede o limite de ${MAX_STRING_LENGTH} caracteres.`
+                            );
+                            // Consome o restante da string até as aspas finais ou EOF
+                            while (this.peek() !== '"' && this.position < this.text.length) {
+                                if (this.peek() === "\n") {
+                                    this.avancaLinha();
+                                } else {
+                                    this.advance();
+                                }
+                            }
+                            break;
+                        }
+
                         str += this.peek();
                         this.advance();
                     }
@@ -218,8 +358,25 @@ class Lexer {
             if (isNumber.test(char)) {
                 let num = "";
                 let isReal = false;
+                const MAX_NUMBER_LENGTH = 15; // Limite de dígitos para números
 
-                while (isNumber.test(this.peek()) || this.peek() === ",") {
+                while (isNumber.test(this.peek()) || this.peek() === "," || this.peek() === ".") {
+                    // Validação: ponto decimal não é permitido (apenas vírgula)
+                    if (this.peek() === ".") {
+                        this.addError(
+                            `\x1b[31m========================================\x1b[0m
+\x1b[31m[ERRO] Formato de número real inválido\x1b[0m
+\x1b[31m========================================\x1b[0m
+\x1b[1mDetalhes:\x1b[0m
+  - \x1b[36mArquivo:\x1b[0m \x1b[33m${this.filename}\x1b[0m
+  - \x1b[36mLinha:\x1b[0m \x1b[33m${this.linha}\x1b[0m
+  - \x1b[36mColuna:\x1b[0m \x1b[33m${this.coluna}\x1b[0m
+  - \x1b[36mContexto:\x1b[0m Use vírgula (,) para separar a parte decimal, não ponto (.). Exemplo: \x1b[33m3,14\x1b[0m ao invés de \x1b[33m3.14\x1b[0m`
+                        );
+                        this.advance(); // Consome o ponto e continua
+                        break;
+                    }
+
                     if (this.peek() === ",") {
                         if (isReal) {
                             this.addError(
@@ -227,34 +384,49 @@ class Lexer {
 \x1b[31m[ERRO] Número real inválido\x1b[0m
 \x1b[31m========================================\x1b[0m
 \x1b[1mDetalhes:\x1b[0m
-  - \x1b[36mArquivo:\x1b[0m \x1b[33m${this.filename}\x1b[0m
   - \x1b[36mLinha:\x1b[0m \x1b[33m${this.linha}\x1b[0m
   - \x1b[36mColuna:\x1b[0m \x1b[33m${this.coluna}\x1b[0m
   - \x1b[36mContexto:\x1b[0m Próximo do identificador '\x1b[33m${num}\x1b[0m'`
                             );
                         }
                         isReal = true;
-                        num += ".";
+                        num += ","; // No Parser vamos trocar por .
                         this.advance();
                         continue;
                     }
+
+                    // Validação: número muito grande
+                    if (num.length >= MAX_NUMBER_LENGTH) {
+                        this.addError(
+                            `\x1b[31m========================================\x1b[0m
+\x1b[31m[ERRO] Número muito grande\x1b[0m
+\x1b[31m========================================\x1b[0m
+\x1b[1mDetalhes:\x1b[0m
+  - \x1b[36mArquivo:\x1b[0m \x1b[33m${this.filename}\x1b[0m
+  - \x1b[36mLinha:\x1b[0m \x1b[33m${tokenInicioLinha}\x1b[0m
+  - \x1b[36mColuna:\x1b[0m \x1b[33m${tokenInicioColuna}\x1b[0m
+  - \x1b[36mContexto:\x1b[0m O número '\x1b[33m${num}\x1b[0m' excede o limite de ${MAX_NUMBER_LENGTH} dígitos.`
+                        );
+                        // Consome o restante do número
+                        while (isNumber.test(this.peek()) || this.peek() === ",") {
+                            this.advance();
+                        }
+                        break;
+                    }
+
                     num += this.peek();
                     this.advance();
                 }
 
-                if (num.endsWith(".")) {
+                if (num.endsWith(",")) {
                     this.addError(
                         `\x1b[31m========================================\x1b[0m
 \x1b[31m[ERRO] Número real inválido\x1b[0m
 \x1b[31m========================================\x1b[0m
 \x1b[1mDetalhes:\x1b[0m
-  - \x1b[36mArquivo:\x1b[0m \x1b[33m${this.filename}\x1b[0m
   - \x1b[36mLinha:\x1b[0m \x1b[33m${this.linha}\x1b[0m
   - \x1b[36mColuna:\x1b[0m \x1b[33m${this.coluna}\x1b[0m
-  - \x1b[36mContexto:\x1b[0m O número '\x1b[33m${num.replace(
-                            ".",
-                            ","
-                        )}\x1b[0m' não pode terminar com vírgula.`
+  - \x1b[36mContexto:\x1b[0m O número '\x1b[33m${num}\x1b[0m' não pode terminar com vírgula.`
                     );
                 }
 
@@ -264,7 +436,6 @@ class Lexer {
 \x1b[31m[ERRO] Identificador inválido\x1b[0m
 \x1b[31m========================================\x1b[0m
 \x1b[1mDetalhes:\x1b[0m
-  - \x1b[36mArquivo:\x1b[0m \x1b[33m${this.filename}\x1b[0m
   - \x1b[36mLinha:\x1b[0m \x1b[33m${this.linha}\x1b[0m
   - \x1b[36mColuna:\x1b[0m \x1b[33m${this.coluna}\x1b[0m
   - \x1b[36mContexto:\x1b[0m Identificadores não podem começar com números: '\x1b[33m${num}${this.peek()}\x1b[0m...'`
@@ -367,7 +538,7 @@ class Lexer {
 
                 if (word === "SENAO") {
                     return {
-                        type: TokenType.SE,
+                        type: TokenType.SENAO,
                         value: word,
                         linha: tokenInicioLinha,
                         coluna: tokenInicioColuna,
@@ -389,7 +560,7 @@ class Lexer {
                     "SENAO",
                 ];
                 for (const kw of keywords) {
-                    if (word.startsWith(kw)) {
+                    if (word.startsWith(kw) && word !== kw) {
                         this.addError(
                             `\x1b[31m========================================\x1b[0m
 \x1b[31m[ERRO] Palavra reservada inválida\x1b[0m
@@ -416,7 +587,6 @@ class Lexer {
 \x1b[31m[ERRO] Caractere inválido\x1b[0m
 \x1b[31m========================================\x1b[0m
 \x1b[1mDetalhes:\x1b[0m
-  - \x1b[36mArquivo:\x1b[0m \x1b[33m${this.filename}\x1b[0m
   - \x1b[36mLinha:\x1b[0m \x1b[33m${this.linha}\x1b[0m
   - \x1b[36mColuna:\x1b[0m \x1b[33m${this.coluna}\x1b[0m
   - \x1b[36mCaractere:\x1b[0m '\x1b[33m${char}\x1b[0m'`

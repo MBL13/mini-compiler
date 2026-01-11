@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 VAR a = 10 - 3 + 2 : INTEIRO.
 VAR b = 2 + 3 * 4 : INTEIRO.
 VAR c = 10 / 2 + 3 : INTEIRO.
 EXIBIR(a).
 EXIBIR(b).
 EXIBIR(c).
+=======
+VAR ola = "Olá, mundo! Foram 50 commits só hoje" : TEXTO.
+EXIBIR (ola).
+>>>>>>> bde25036f97d4240460367ad58c5429fbdc1fad3
