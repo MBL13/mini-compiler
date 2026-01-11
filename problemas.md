@@ -10,11 +10,9 @@ Atualmente não há problemas conhecidos em aberto. Todos os problemas listados 
 - [x] **Números Reais:** Implementada validação para impedir múltiplos pontos/vírgulas e terminação com separador (`12.`).
 - [x] **Strings:** Implementado suporte a strings e erro para strings não terminadas.
 - [x] **Relatório de Múltiplos Erros:** Lexer agora acumula e exibe todos os erros de uma vez.
-- [ ] **Mensagem de erro ao inserir ponto no numero real** Mostrar um erro quando o usuario mete o ponto no numero real.
-
-- [ ] **Validação ara números ou string muito grandes** Mostrar uma mensagem quando o número ou string é muito grande
-
-- [ ] **Quando o comentario em bloco não é fechado** Mostrar uma mensagem
+- [x] **Mensagem de erro ao inserir ponto no numero real:** Implementado erro quando o usuário usa ponto (.) em vez de vírgula (,) para números reais.
+- [x] **Validação para números ou string muito grandes:** Implementado limite de 15 dígitos para números e 500 caracteres para strings.
+- [x] **Quando o comentario em bloco não é fechado:** Implementado detecção de comentários `/* */` não fechados.
 
 
 ### Parser

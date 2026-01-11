@@ -1,6 +1,4 @@
-VAR a = 10 - 3 + 2 : INTEIRO.
-VAR b = 2 + 3 * 4 : INTEIRO.
-VAR c = 10 / 2 + 3 : INTEIRO.
-EXIBIR(a).
-EXIBIR(b).
-EXIBIR(c).
+VAR x = 3.14 : REAL.
+VAR y  = 123456789012345678 : INTEIRO.
+/* Este é um comentário sem fechamento
+VAR z = "teste" : TEXTO.
