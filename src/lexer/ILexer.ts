@@ -27,6 +27,11 @@ enum TokenType {
     VERDADEIRO = "VERDADEIRO", // Literal lógico verdadeiro
     FALSO = "FALSO", // Literal lógico falso
 
+
+    // Estruturas de controle
+    SE = "SE", // Palavra-chave 'SE'
+    SENAO = "SENAO", // Palavra-chave 'SENAO'
+
     // Delimitadores
     PARENTES_ESQUERDO = "PARENTES_ESQUERDO", // Parênteses esquerdo '('
     PARENTES_DIREITO = "PARENTES_DIREITO", // Parênteses direito ')'

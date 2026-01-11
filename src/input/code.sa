@@ -1,2 +1,2 @@
-VAR nome = 3,9 : REAL.
-EXIBIR (nome).
+VAR bool = FALSO : LOGICO.
+EXIBIR (bool).

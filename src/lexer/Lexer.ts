@@ -322,22 +322,40 @@ class Lexer {
             coluna: tokenInicioColuna,
           };
 
-       if (word === "VERDADEIRO") {
-  return {
-    type: TokenType.VERDADEIRO,
-    value: word,
-    linha: tokenInicioLinha,
-    coluna: tokenInicioColuna,
-  };
-}
-if (word === "FALSO") {
-  return {
-    type: TokenType.FALSO,
-    value: word,
-    linha: tokenInicioLinha,
-    coluna: tokenInicioColuna,
-  };
-}
+        if (word === "VERDADEIRO") {
+          return {
+            type: TokenType.VERDADEIRO,
+            value: word,
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
+        if (word === "FALSO") {
+          return {
+            type: TokenType.FALSO,
+            value: word,
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
+
+        if (word === "SE") {
+          return {
+            type: TokenType.SE,
+            value: word,
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
+
+        if (word === "SENAO") {
+          return {
+            type: TokenType.SE,
+            value: word,
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
 
         // Validação de palavras reservadas "erradas" (ex: VARc, REALx)
         const keywords = [
@@ -348,6 +366,10 @@ if (word === "FALSO") {
           "NATURAL",
           "TEXTO",
           "LOGICO",
+          "VERDADEIRO",
+          "FALSO",
+          "SE",
+          "SENAO",
         ];
         for (const kw of keywords) {
           if (word.startsWith(kw)) {
