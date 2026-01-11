@@ -32,7 +32,8 @@ aproximar de linguagens modernas e preparar o compilador para
 
 ### Alterações
 - Reconhecimento dos novos lexemas definidos no ILexer
-- Suporte a delimitadores adicionais
+- Suporte aos delimitadores: ponto e parenteses
+- 
 
 
 
@@ -42,11 +43,21 @@ aproximar de linguagens modernas e preparar o compilador para
 
 #### Antes:
 
+```
 LET IDENTIFICADOR = expr TIPO ;
+```
+
+```
+EXIBIR IDENTIFICADOR.
+
+```
 
 #### Depois:
 
+```
 VAR IDENTIFICADOR = expr : TIPO .
-
-
+```
+```
+EXIBIR(IDENTIFICADOR).
+```
 ---
