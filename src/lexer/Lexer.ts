@@ -8,9 +8,11 @@ class Lexer {
     private position: number = 0;
     private linha: number = 1;
     private coluna: number = 1;
+    private filename: string;
 
-    constructor(text: string) {
+    constructor(text: string, filename: string = "unknown") {
         this.text = text;
+        this.filename = filename;
     }
 
     /**
@@ -116,6 +118,7 @@ class Lexer {
 \x1b[31m[ERRO] Número real inválido\x1b[0m
 \x1b[31m========================================\x1b[0m
 \x1b[1mDetalhes:\x1b[0m
+  - \x1b[36mArquivo:\x1b[0m \x1b[33m${this.filename}\x1b[0m
   - \x1b[36mLinha:\x1b[0m \x1b[33m${this.linha}\x1b[0m
   - \x1b[36mColuna:\x1b[0m \x1b[33m${this.coluna}\x1b[0m
   - \x1b[36mContexto:\x1b[0m Próximo do identificador '\x1b[33m${num}\x1b[0m'`
@@ -156,7 +159,16 @@ class Lexer {
                 // Se não for palavra-chave, é um identificador (nome de variável)
                 return { type: TokenType.IDENTIFICADOR, value: word, linha: tokenInicioLinha, coluna: tokenInicioColuna };
             }
-            throw new Error(`Caractere inválido: ${char}, na linha ${this.linha}, coluna ${this.coluna}`);
+            throw new Error(
+                `\x1b[31m========================================\x1b[0m
+\x1b[31m[ERRO] Caractere inválido\x1b[0m
+\x1b[31m========================================\x1b[0m
+\x1b[1mDetalhes:\x1b[0m
+  - \x1b[36mArquivo:\x1b[0m \x1b[33m${this.filename}\x1b[0m
+  - \x1b[36mLinha:\x1b[0m \x1b[33m${this.linha}\x1b[0m
+  - \x1b[36mColuna:\x1b[0m \x1b[33m${this.coluna}\x1b[0m
+  - \x1b[36mCaractere:\x1b[0m '\x1b[33m${char}\x1b[0m'`
+            );
         }
 
         // Fim do arquivo atingido

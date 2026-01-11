@@ -20,7 +20,7 @@ const code = fs.readFileSync(filePath, "utf-8");
 
 // 1. Instância do Lexer com o código bruto
 try {
-    const lexer = new Lexer(code);
+    const lexer = new Lexer(code, "code.sa");
 
     // 2. Instância do Parser que consome o Lexer para gerar a AST
     const parser = new Parser(lexer);
