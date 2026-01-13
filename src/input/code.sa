@@ -7,4 +7,3 @@ EXIBIR(c).
 
 VAR ola = "Olá, mundo! Foram 50 commits só hoje" : TEXTO.
 EXIBIR (ola).
-
