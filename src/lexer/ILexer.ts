@@ -3,7 +3,12 @@
  */
 enum TokenType {
   VAR = "VAR", // Palavra-chave 'VAR'
+
+  // Comando de exibição de dados
   EXIBIR = "EXIBIR", // Palavra-chave 'EXIBIR'
+
+  // Comando de inserção de dados
+  INSERIR = "INSERIR", // Palavra-chave 'INSERIR'
 
   // Operadoes aritmeticos
   MENOS = "MENOS", // Operador de subtração '-'
@@ -31,12 +36,12 @@ enum TokenType {
   SENAO = "SENAO", // Palavra-chave 'SENAO'
 
   // Delimitadores
-  PARENTESE_ESQUERDO = "PARENTES_ESQUERDO", // Parênteses esquerdo '('
-  PARENTESE_DIREITO = "PARENTES_DIREITO", // Parênteses direito ')'
+  PARENTESE_ESQUERDO = "PARENTE_ESQUERDO", // Parênteses esquerdo '('
+  PARENTESE_DIREITO = "PARENTE_DIREITO", // Parênteses direito ')'
   COLCHETE_ESQUERDA = "COLCHETE_ESQUERDO", // Colchete esquerdo '['
   COLCHETE_DIREITA = "COLCHETE_DIREITO", // Colchete direito ']'
-  CHAVE_ESQUERDA = "CHAVE_ESQUERDO", // Chave esquerda '{'
-  CHAVE_DIREITA = "CHAVE_DIREITO", // Chave direita '}'
+  CHAVE_ESQUERDA = "CHAVE_ESQUERDA", // Chave esquerda '{'
+  CHAVE_DIREITA = "CHAVE_DIREITA", // Chave direita '}'
   VIRGULA = "VIRGULA", // Vírgula ','
   DOIS_PONTOS = "DOIS_PONTOS", // Dois pontos ':'
   PONTO = "PONTO", // ponto final de cada linha '.'

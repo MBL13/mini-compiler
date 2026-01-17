@@ -38,5 +38,6 @@ Atualmente não há problemas conhecidos em aberto. Todos os problemas listados 
 - [x] **Uso de palavra reservada como identificador:** `VAR VAR = 10` → `[ERRO] Palavra reservada não pode ser usada como identificador`
 - [x] **EXIBIR sem parênteses:** `EXIBIR 10` → `[ERRO] Esperado '(' após EXIBIR`
 - [x] **Tipo incompatível em expressão aritmética:** `VAR x = "abc" + 10 : TEXTO.` → `[ERRO] Operador '+' não é válido entre TEXTO e INTEIRO`
+- [x] **Concatenação entre textos**:`VAR x = "abc" + 10 : TEXTO.`  → `ERRO  Operador '+' não é válido entre TEXTO e TEXTO`
 
 ```

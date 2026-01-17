@@ -1,9 +1,28 @@
-VAR a = 10 - 3 + 2 : INTEIRO.
+VAR a : INTEIRO.
 VAR b = 2 + 3 * 4 : INTEIRO.
 VAR c = 10 / 2 + 3 : INTEIRO.
+
 EXIBIR(a).
 EXIBIR(b).
 EXIBIR(c).
 
 VAR ola = "Olá, mundo! Foram 50 commits só hoje" : TEXTO.
 EXIBIR (ola).
+
+SE(b == 5){
+    EXIBIR("Verdadeiro 1").
+
+    EXIBIR(b).
+}
+
+SENAO SE(b >= 8){
+   
+    VAR nome: TEXTO.
+
+    INSERIR(nome).
+    EXIBIR("FALSO 2 exibindo a variavel a").
+    EXIBIR(nome).
+}
+SENAO{
+    EXIBIR("TERCEIRA OPCAO 3").
+}
