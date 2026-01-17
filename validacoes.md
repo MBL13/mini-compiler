@@ -82,3 +82,19 @@ Abaixo estão listadas as validações de erro do sistema, organizadas por etapa
 *   **Divisão por Zero**
     *   **Descrição:** Operação matemática proibida.
     *   **Exemplo:** `10 / 0`
+
+*   **Operador sem operando**
+    *   **Descrição:** Faltou um operando à direita de um operador.
+    *   **Exemplo:** `VAR x = 10 + .`
+
+*   **Expressão vazia**
+    *   **Descrição:** O comando `EXIBIR` foi chamado com parênteses vazios.
+    *   **Exemplo:** `EXIBIR().`
+
+*   **EXIBIR sem parênteses**
+    *   **Descrição:** O comando `EXIBIR` foi usado sem parênteses.
+    *   **Exemplo:** `EXIBIR x.`
+
+*   **Tipo incompatível em expressão aritmética**
+    *   **Descrição:** Tenta realizar operações aritméticas entre tipos incompatíveis (ex: texto e número).
+    *   **Exemplo:** `VAR x = "abc" + 10 : TEXTO.`

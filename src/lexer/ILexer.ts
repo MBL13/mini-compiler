@@ -40,7 +40,6 @@ enum TokenType {
   VIRGULA = "VIRGULA", // Vírgula ','
   DOIS_PONTOS = "DOIS_PONTOS", // Dois pontos ':'
   PONTO = "PONTO", // ponto final de cada linha '.'
-  PONTO_VIRGUAL = "PONTO_VIRGUAL", // ponto e vírgula ';'
 
   //   Operadores de comparação
   MAIOR_QUE = "MAIOR_QUE", // Maior que '>'

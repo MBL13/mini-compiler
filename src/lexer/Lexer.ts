@@ -220,6 +220,7 @@ class Lexer {
                 };
             }
 
+
             // Operadores de comparação
 
             if (char === "=" && this.peekNext() === "=") {

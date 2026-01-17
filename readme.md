@@ -79,7 +79,7 @@ A linguagem implementada no projecto suporta:
 ```
 VAR x = 3: INTEIRO.
 VAR y = x / 1: INTEIRO.
-EXIBIR y.
+EXIBIR(y).
 ```
 
 ---

@@ -11,6 +11,29 @@ interface Symbol {
  */
 class SemanticAnalyzer {
   private simbols: Record<string, Symbol> = {};
+  private filename: string;
+
+  constructor(filename: string = "code.sa") {
+    this.filename = filename;
+  }
+
+  /**
+   * Formata uma mensagem de erro com cores ANSI e informações detalhadas.
+   */
+  private formatError(
+    errorType: string,
+    details: string,
+    node: ASTNode
+  ): string {
+    return `\x1b[31m========================================\x1b[0m
+\x1b[31m[ERRO] ${errorType}\x1b[0m
+\x1b[31m========================================\x1b[0m
+\x1b[1mDetalhes:\x1b[0m
+  - \x1b[36mArquivo:\x1b[0m \x1b[33m${this.filename}\x1b[0m
+  - \x1b[36mLinha:\x1b[0m \x1b[33m${node.linha || "?"}\x1b[0m
+  - \x1b[36mColuna:\x1b[0m \x1b[33m${node.coluna || "?"}\x1b[0m
+  - \x1b[36mContexto:\x1b[0m ${details}`;
+  }
 
   /**
    * Executa a lista de comandos representada pela AST.
@@ -35,35 +58,55 @@ class SemanticAnalyzer {
           case "INTEIRO":
             if (!Number.isInteger(value)) {
               throw new Error(
-                `Erro semântico: valor ${value} não é compatível com tipo INTEIRO`
+                this.formatError(
+                  "Tipo Incompatível",
+                  `Valor \x1b[33m${value}\x1b[0m não é compatível com tipo \x1b[33mINTEIRO\x1b[0m`,
+                  node
+                )
               );
             }
             break;
           case "REAL":
             if (typeof value !== "number") {
               throw new Error(
-                `Erro semântico: valor ${value} não é compatível com tipo REAL`
+                this.formatError(
+                  "Tipo Incompatível",
+                  `Valor \x1b[33m${value}\x1b[0m não é compatível com tipo \x1b[33mREAL\x1b[0m`,
+                  node
+                )
               );
             }
             break;
           case "NATURAL":
             if (!Number.isInteger(value) || value < 0) {
               throw new Error(
-                `Erro semântico: valor ${value} não é compatível com tipo NATURAL`
+                this.formatError(
+                  "Tipo Incompatível",
+                  `Valor \x1b[33m${value}\x1b[0m não é compatível com tipo \x1b[33mNATURAL\x1b[0m`,
+                  node
+                )
               );
             }
             break;
           case "TEXTO":
             if (typeof value !== "string") {
               throw new Error(
-                `Erro semântico: valor ${value} não é compatível com tipo TEXTO`
+                this.formatError(
+                  "Tipo Incompatível",
+                  `Valor \x1b[33m${value}\x1b[0m não é compatível com tipo \x1b[33mTEXTO\x1b[0m`,
+                  node
+                )
               );
             }
             break;
           case "LOGICO":
             if (typeof value !== "boolean") {
               throw new Error(
-                `Erro semântico: valor ${value} não é compatível com tipo LOGICO`
+                this.formatError(
+                  "Tipo Incompatível",
+                  `Valor \x1b[33m${value}\x1b[0m não é compatível com tipo \x1b[33mLOGICO\x1b[0m`,
+                  node
+                )
               );
             }
             break;
@@ -104,7 +147,13 @@ class SemanticAnalyzer {
         const cond = this.visit(node.condition);
 
         if (typeof cond !== "boolean") {
-          throw new Error("Condição do SE deve ser lógica");
+          throw new Error(
+            this.formatError(
+              "Erro de Tipo",
+              "Condição do SE deve ser lógica",
+              node
+            )
+          );
         }
 
         if (cond) {
@@ -132,7 +181,7 @@ class SemanticAnalyzer {
           case "<=":
             return l <= r;
 
-            
+
         }
 
       // Identificador
@@ -140,7 +189,11 @@ class SemanticAnalyzer {
         const symbol = this.simbols[node.name];
         if (!symbol) {
           throw new Error(
-            `Erro semântico: variavel ${node.name} não foi declarada`
+            this.formatError(
+              "Variável Não Declarada",
+              `Variável \x1b[33m${node.name}\x1b[0m não foi declarada`,
+              node
+            )
           );
         }
         return symbol.value;
@@ -152,16 +205,24 @@ class SemanticAnalyzer {
 
         // Validação de tipos: ambos devem ser números
         if (typeof left !== "number" || typeof right !== "number") {
+          const type1 = this.getUserFriendlyType(left);
+          const type2 = this.getUserFriendlyType(right);
           throw new Error(
-            `Erro semântico: operação '${
-              node.operator
-            }' inválida entre tipos ${typeof left} e ${typeof right}`
+            this.formatError(
+              "Tipo incompatível em expressão aritmética",
+              `Operador '${node.operator}' não é válido entre ${type1} e ${type2}`,
+              node
+            )
           );
         }
         // Checar divisão por zero
         if (node.operator === "/" && right === 0) {
           throw new Error(
-            `Expressão mal definida: ${left} / ${right} . Não é possível dividir por zero`
+            this.formatError(
+              "Expressão mal definida",
+              `Não é possível dividir \x1b[33m${left}\x1b[0m por \x1b[33m${right}\x1b[0m (divisão por zero)`,
+              node
+            )
           );
         }
 
@@ -181,6 +242,13 @@ class SemanticAnalyzer {
       default:
         throw new Error(`Nó AST desconhecido: ${node.type}`);
     }
+  }
+
+  private getUserFriendlyType(value: any): string {
+    if (typeof value === "number") return "INTEIRO"; // simplifies for now, maybe distinguish later if needed
+    if (typeof value === "string") return "TEXTO";
+    if (typeof value === "boolean") return "LOGICO";
+    return typeof value;
   }
 }
 

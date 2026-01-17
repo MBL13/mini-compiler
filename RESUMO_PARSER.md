@@ -25,5 +25,9 @@ Todos os erros do Parser agora exibem:
 5. Erro de Tipo (NATURAL)
 6. Tipo de Variável Inválido
 7. Comando Inválido
+8. Operador sem operando
+9. Expressão vazia
+10. EXIBIR sem parênteses
+11. Tipo incompatível em expressão aritmética
 
 Todos incluem cores e informações contextuais ricas.

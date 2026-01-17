@@ -41,7 +41,7 @@ aproximar de linguagens modernas e preparar o compilador para
 
 ### Alterações
 - Reconhecimento dos novos lexemas definidos no ILexer (incluindo TEXTO)
-- Suporte aos delimitadores: ponto e parenteses
+- Suporte aos delimitadores: ponto e parenteses (Ponto e vírgula removido)
 - Utilização de vírgula para números de ponto flutuante
 - Reconhecimento do lexema Menos(-) para numeros negativos definidos no Ilexter
 - Reconhecimento do lexema TEXTO para textos defino no ILexer
@@ -65,6 +65,14 @@ aproximar de linguagens modernas e preparar o compilador para
     - Adicionada detecção de erro para comentários iniciados com `/*` que não foram fechados com `*/`.
 
 
+
+- **Novas Mensagens de Erro Específicas:**
+    - Operador sem operando à direita.
+    - Expressão vazia em `EXIBIR()`.
+    - Declaração incompleta após `VAR`.
+    - Palavra reservada usada como identificador.
+    - `EXIBIR` sem parênteses.
+    - Tipo incompatível em expressões aritméticas (ex: `TEXTO + INTEIRO`).
 
 ## 3. Parser
 
@@ -111,7 +119,7 @@ Verificação de tipo: Se a condição não for booleana, o Parser lança erro s
 
 **Se**:
     SE(condição) {
-    comandos;
+    comandos.
 }
 
 

@@ -32,21 +32,11 @@ Atualmente não há problemas conhecidos em aberto. Todos os problemas listados 
 
 - [x] **Possiblidade de meter varios códigos:** Adicionar varios códigos fonte na pasta input para poder executar, principalmente em testes.
 
-- [ ] **Operador sem operando:** VAR x = 10 + ; [ERRO] Operador '+' sem operando à direita
-
-- [ ] **Expressão vazia:** EXIBIR();
- ; [ERRO] Expressão vazia não é permitida
-
-- [ ] **Declaração incompleta**VAR = 10 : INTEIRO;
- ; [ERRO] Identificador esperado após VAR
-
-- [ ] **Uso de palavra reservada como identificador**VAR VAR = 10 : INTEIRO;
- ; [ERRO] Palavra reservada não pode ser usada como identificador
-
-- [ ] **EXIBIR sem parênteses**EXIBIR 10;
- ; [ERRO] Esperado '(' após EXIBIR
-
-- [ ] **Tipo incompatível em expressão aritmética** VAR x = "abc" + 10 : TEXTO
- ; [ERRO] Operador '+' não é válido entre TEXTO e INTEIRO
+- [x] **Operador sem operando:** `VAR x = 10 +` → `[ERRO] Operador '+' sem operando à direita`
+- [x] **Expressão vazia:** `EXIBIR()` → `[ERRO] Expressão vazia não é permitida`
+- [x] **Declaração incompleta:** `VAR = 10` → `[ERRO] Identificador esperado após VAR`
+- [x] **Uso de palavra reservada como identificador:** `VAR VAR = 10` → `[ERRO] Palavra reservada não pode ser usada como identificador`
+- [x] **EXIBIR sem parênteses:** `EXIBIR 10` → `[ERRO] Esperado '(' após EXIBIR`
+- [x] **Tipo incompatível em expressão aritmética:** `VAR x = "abc" + 10 : TEXTO.` → `[ERRO] Operador '+' não é válido entre TEXTO e INTEIRO`
 
 ```

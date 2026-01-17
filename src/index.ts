@@ -43,7 +43,7 @@ try {
   const ast = parser.parse();
 
   // 3. Instância do Analisador Semântico que executa a AST gerada
-  const semantic = new SemanticAnalyzer();
+  const semantic = new SemanticAnalyzer("code.sa");
   semantic.execute(ast);
 } catch (error: any) {
   console.error(error.message);

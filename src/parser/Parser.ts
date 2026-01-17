@@ -102,6 +102,8 @@ class Parser {
                 type: "UnaryExpression",
                 operator: "-",
                 argument: node,
+                linha: token.linha,
+                coluna: token.coluna,
             };
         }
 
@@ -111,6 +113,8 @@ class Parser {
                 type: "NumberLiteral",
                 value: Number(token.value.replace(",", ".")),
                 numberType: token.type,
+                linha: token.linha,
+                coluna: token.coluna,
             };
         }
 
@@ -119,6 +123,8 @@ class Parser {
             return {
                 type: "StringLiteral",
                 value: token.value,
+                linha: token.linha,
+                coluna: token.coluna,
             };
         }
 
@@ -128,6 +134,8 @@ class Parser {
             return {
                 type: "BooleanLiteral",
                 value: token.type === TokenType.VERDADEIRO, // true se VERDADEIRO, false se FALSO
+                linha: token.linha,
+                coluna: token.coluna,
             };
         }
 
@@ -141,7 +149,16 @@ class Parser {
 
         if (token.type === TokenType.IDENTIFICADOR) {
             this.eat(TokenType.IDENTIFICADOR);
-            return { type: "IDENTIFICADOR", name: token.value };
+            return { type: "IDENTIFICADOR", name: token.value, linha: token.linha, coluna: token.coluna };
+        }
+
+        if ((token.type as any) === TokenType.EOF) {
+            throw new Error(
+                this.formatError(
+                    "Operador sem operando",
+                    "Operador sem operando à direita"
+                )
+            );
         }
 
         throw new Error(
@@ -163,7 +180,8 @@ class Parser {
             this.currentToken.type === TokenType.MULTIPLICACAO ||
             this.currentToken.type === TokenType.DIVISAO
         ) {
-            const operator = this.currentToken.type;
+            const operatorToken = this.currentToken;
+            const operator = operatorToken.type;
             this.eat(operator);
 
             node = {
@@ -171,6 +189,8 @@ class Parser {
                 operator: operator === TokenType.MULTIPLICACAO ? "*" : "/",
                 left: node,
                 right: this.factor(),
+                linha: operatorToken.linha,
+                coluna: operatorToken.coluna,
             };
         }
 
@@ -188,7 +208,8 @@ class Parser {
             this.currentToken.type === TokenType.MAIS ||
             this.currentToken.type === TokenType.MENOS
         ) {
-            const operator = this.currentToken.type;
+            const operatorToken = this.currentToken;
+            const operator = operatorToken.type;
             this.eat(operator);
 
             node = {
@@ -196,6 +217,8 @@ class Parser {
                 operator: operator === TokenType.MAIS ? "+" : "-",
                 left: node,
                 right: this.term(),
+                linha: operatorToken.linha,
+                coluna: operatorToken.coluna,
             };
         }
 
@@ -211,10 +234,47 @@ class Parser {
     private statement(): ASTNode {
         // Caso: var x = expression: TIPO;
         if (this.currentToken.type === TokenType.VAR) {
+            const varToken = this.currentToken;
             this.eat(TokenType.VAR);
 
-            const id = this.currentToken.value;
+            const idToken = this.currentToken;
+            if ((idToken.type as any) !== TokenType.IDENTIFICADOR) {
+                let errorMsg = "Identificador esperado após VAR";
+                if (
+                    (idToken.type as any) === TokenType.VAR ||
+                    (idToken.type as any) === TokenType.EXIBIR ||
+                    (idToken.type as any) === TokenType.INTEIRO ||
+                    (idToken.type as any) === TokenType.REAL ||
+                    (idToken.type as any) === TokenType.NATURAL ||
+                    (idToken.type as any) === TokenType.TEXTO ||
+                    (idToken.type as any) === TokenType.LOGICO ||
+                    (idToken.type as any) === TokenType.SE ||
+                    (idToken.type as any) === TokenType.SENAO ||
+                    (idToken.type as any) === TokenType.VERDADEIRO ||
+                    (idToken.type as any) === TokenType.FALSO
+                ) {
+                    errorMsg = "Palavra reservada não pode ser usada como identificador";
+                }
+
+                throw new Error(
+                    this.formatError(
+                        "Declaração incompleta",
+                        errorMsg
+                    )
+                );
+            }
+
+            const id = idToken.value;
             this.eat(TokenType.IDENTIFICADOR);
+
+            if ((this.currentToken.type as any) !== TokenType.ATRIBUICAO) {
+                throw new Error(
+                    this.formatError(
+                        "Declaração incompleta",
+                        "Esperado '=' após identificador"
+                    )
+                );
+            }
             this.eat(TokenType.ATRIBUICAO);
 
             const value = this.expr();
@@ -230,6 +290,7 @@ class Parser {
                 varType.type === TokenType.LOGICO
             ) {
                 // Validação de Tipos no Parser (Sintaxe Estendida)
+                /* 
                 if (
                     varType.type === TokenType.TEXTO &&
                     value.type !== "StringLiteral"
@@ -242,6 +303,7 @@ class Parser {
                         )
                     );
                 }
+                */
 
                 if (
                     varType.type === TokenType.LOGICO &&
@@ -286,13 +348,34 @@ class Parser {
                 id,
                 value,
                 varType: varType.type,
+                linha: varToken.linha,
+                coluna: varToken.coluna,
             };
         }
 
         // Caso: print expression;
         if (this.currentToken.type === TokenType.EXIBIR) {
+            const exibirToken = this.currentToken;
             this.eat(TokenType.EXIBIR);
+
+            if ((this.currentToken.type as any) !== TokenType.PARENTESE_ESQUERDO) {
+                throw new Error(
+                    this.formatError(
+                        "EXIBIR sem parênteses",
+                        "Esperado '(' após EXIBIR"
+                    )
+                );
+            }
             this.eat(TokenType.PARENTESE_ESQUERDO);
+
+            if ((this.currentToken.type as any) === TokenType.PARENTESE_DIREITO) {
+                throw new Error(
+                    this.formatError(
+                        "Expressão vazia",
+                        "Expressão vazia não é permitida"
+                    )
+                );
+            }
 
             const value = this.expr();
             this.eat(TokenType.PARENTESE_DIREITO);
@@ -301,11 +384,14 @@ class Parser {
             return {
                 type: "PrintStatement",
                 value,
+                linha: exibirToken.linha,
+                coluna: exibirToken.coluna,
             };
         }
 
         // caso: SE
         if (this.currentToken.type === TokenType.SE) {
+            const seToken = this.currentToken;
             this.eat(TokenType.SE);
             this.eat(TokenType.PARENTESE_ESQUERDO);
 
@@ -320,6 +406,8 @@ class Parser {
                 type: "IfStatement",
                 condition,
                 trueBranch,
+                linha: seToken.linha,
+                coluna: seToken.coluna,
             };
         }
 
@@ -368,6 +456,8 @@ class Parser {
                 operator: operatorToken.value,
                 left,
                 right,
+                linha: operatorToken.linha,
+                coluna: operatorToken.coluna,
             };
         }
 
