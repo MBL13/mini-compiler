@@ -214,6 +214,16 @@ class Lexer {
         };
       }
 
+      if (char === ";") {
+        this.advance();
+        return {
+          type: TokenType.PONTO_E_VIRGULA,
+          value: ";",
+          linha: tokenInicioLinha,
+          coluna: tokenInicioColuna,
+        };
+      }
+
       if (char === ":") {
         this.advance();
         return {

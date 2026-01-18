@@ -51,6 +51,7 @@ enum TokenType {
   CHAVE_DIREITA = "CHAVE_DIREITA", // Chave direita '}'
   VIRGULA = "VIRGULA", // Vírgula ','
   DOIS_PONTOS = "DOIS_PONTOS", // Dois pontos ':'
+  PONTO_E_VIRGULA = "PONTO_E_VIRGULA", // Ponto e vírgula ';'
   PONTO = "PONTO", // ponto final de cada linha '.'
 
   //   Operadores de comparação
