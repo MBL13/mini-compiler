@@ -1,9 +1,10 @@
+import fs from "fs";
+import path from "path";
+import readlineSync from "readline-sync";
 import Lexer from "./lexer/Lexer";
 import Parser from "./parser/Parser";
 import SemanticAnalyzer from "./semantic/Semantic";
 import { TokenType } from "./lexer/ILexer";
-import fs from "fs";
-import path from "path";
 
 /**
  * PONTO de entrada do compilador.
@@ -15,36 +16,78 @@ import path from "path";
  * Ola Mundo
  */
 
-// Caminho do arquivo de entrada (.nt)
-const filePath = path.join(__dirname, "input", "code.sa");
-const code = fs.readFileSync(filePath, "utf-8");
+const inputDir = path.join(__dirname, "input");
 
-// 1. Instância do Lexer com o código bruto
-let lexer;
-try {
-  // Pré-análise Léxica: Varre todo o arquivo em busca de erros léxicos
-  const errorScanner = new Lexer(code, "code.sa");
-  let token = errorScanner.getNextToken();
+function runMenu() {
+  const files = fs.readdirSync(inputDir).filter(file => file.endsWith(".sa"));
 
-  // Varre até encontrar EOF
-  while (token.type !== TokenType.EOF) {
-    token = errorScanner.getNextToken();
+  if (files.length === 0) {
+    console.log("\x1b[31mNenhum arquivo .sa encontrado na pasta src/input.\x1b[0m");
+    return;
   }
 
-  // Check if errorScanner found errors
-  if (errorScanner.errors.length > 0) {
-    errorScanner.errors.forEach((err) => console.error(err));
-    process.exit(1);
+  console.log("\x1b[36m\x1b[1m========================================\x1b[0m");
+  console.log("\x1b[36m\x1b[1m        MINI-COMPILER - MENU           \x1b[0m");
+  console.log("\x1b[36m\x1b[1m========================================\x1b[0m");
+  console.log("Escolha um programa para executar:");
+
+  files.forEach((file, index) => {
+    console.log(`  \x1b[33m${index + 1}\x1b[0m. ${file}`);
+  });
+  console.log(`  \x1b[33m0\x1b[0m. Sair`);
+  console.log("\x1b[36m----------------------------------------\x1b[0m");
+
+  const choice = readlineSync.question("Opção: ");
+  const index = parseInt(choice, 10) - 1;
+
+  if (choice === "0") {
+    console.log("Saindo...");
+    return;
   }
 
-  // Se não houve erros léxicos, prossegue para o Parser
-  lexer = new Lexer(code, "code.sa");
-  const parser = new Parser(lexer);
-  const ast = parser.parse();
-
-  // 3. Instância do Analisador Semântico que executa a AST gerada
-  const semantic = new SemanticAnalyzer("code.sa");
-  semantic.execute(ast);
-} catch (error: any) {
-  console.error(error.message);
+  if (index >= 0 && index < files.length) {
+    const selectedFile = files[index];
+    if (selectedFile) {
+      executeFile(selectedFile);
+    }
+  } else {
+    console.log("\x1b[31mOpção inválida!\x1b[0m");
+    runMenu();
+  }
 }
+
+function executeFile(filename: string) {
+  const filePath = path.join(inputDir, filename);
+  const code = fs.readFileSync(filePath, "utf-8");
+
+  console.log(`\x1b[32mExecutando: ${filename}...\x1b[0m\n`);
+
+  try {
+    // 1. Instância do Lexer para pré-análise de erros
+    const errorScanner = new Lexer(code, filename);
+    let token = errorScanner.getNextToken();
+    while (token.type !== TokenType.EOF) {
+      token = errorScanner.getNextToken();
+    }
+
+    if (errorScanner.errors.length > 0) {
+      errorScanner.errors.forEach((err) => console.error(err));
+      return;
+    }
+
+    // 2. Parser
+    const lexer = new Lexer(code, filename);
+    const parser = new Parser(lexer);
+    const ast = parser.parse();
+
+    // 3. Analisador Semântico e Execução
+    const semantic = new SemanticAnalyzer(filename);
+    semantic.execute(ast);
+
+    console.log(`\n\x1b[32mExecução de ${filename} finalizada com sucesso.\x1b[0m`);
+  } catch (error: any) {
+    console.error(error.message);
+  }
+}
+
+runMenu();
