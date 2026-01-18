@@ -74,6 +74,11 @@ enum TokenType {
   // Novos operadores matemáticos
   RAIZ = "RAIZ", // Operador raiz quadrada '√'
   EXPOENTE = "EXPOENTE", // Operador de exponenciação '^'
+
+
+  // Comandos de controle de fluxo
+  CONTINUAR = "CONTINUAR", // Palavra-chave 'CONTINUAR'
+  PARAR = "PARAR", // Palavra-chave 'PARAR'
 }
 
 

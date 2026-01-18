@@ -649,6 +649,25 @@ class Lexer {
           };
         }
 
+        // Comandos de controle de fluxo
+        if (word === "CONTINUAR") {
+          return {
+            type: TokenType.CONTINUAR,
+            value: word,
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
+
+        if (word === "PARAR") {
+          return {
+            type: TokenType.PARAR,
+            value: word,
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
+
         // Outros operadores matemáticos
         if (word === "RAIZ") {
           return {
@@ -690,6 +709,8 @@ class Lexer {
           "ENQUANTO",
           "FACA",
           "PARA",
+          "CONTINUAR",
+          "PARAR",
         ];
         for (const kw of keywords) {
           if (word.startsWith(kw) && word !== kw) {

@@ -1,34 +1,21 @@
-VAR a=0: INTEIRO.
-
-ENQUANTO(a < 3){
-    EXIBIR("Iterações:", a).
-    a = a + 1.
-    VAR b: INTEIRO.
-    b=  a * 2.
-    EXIBIR(" RESULTADO DE ",a ," X ", " 2 ", " = ", b).
-   EXIBIR("DENTORO DO ENQUANTO").
-}
-
-a=0.
-FACA {
-    EXIBIR("Executa pelo menos uma vez").
-    EXIBIR("DENTORO DO FACA").
-
-    a = a + 1.
-} ENQUANTO(a < 3).
-
-
-
-VAR soma: INTEIRO.
-VAR i = 1: INTEIRO.
-
-VAR soma: INTEIRO.
-soma = 0.
 
 VAR i: INTEIRO.
-PARA(i = 0; i < 5; i = i + 1) {
-    EXIBIR("Iteração do FOR:", i).
-    soma = soma + i.
-EXIBIR("Soma final:", soma).
+
+PARA(i = 0; i < 10; i = i + 1) {
+    SE(i == 3) {
+        EXIBIR("CONTINUANDO NO CONTINUE").
+        CONTINUAR.
+    }
+        EXIBIR("SAINDO NO CONTINUE").
+
+    SE(i == 7) {
+        EXIBIR("ENTRANDO NO PARA 1").
+        PARAR.
+    }
+
+    EXIBIR("i =", i, "aqui").
 }
+
+EXIBIR("Fim do programa").
+
 

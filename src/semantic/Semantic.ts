@@ -11,6 +11,10 @@ interface Symbol {
  * O SemanticAnalyzer percorre a AST para validar semântica e executar os comandos.
  * Ele mantém uma tabela de símbolos para armazenar valores e tipos das variáveis.
  */
+
+class BreakSignal {}
+class ContinueSignal {}
+
 class SemanticAnalyzer {
   private simbols: Record<string, Symbol> = {};
   private filename: string;
@@ -170,6 +174,7 @@ class SemanticAnalyzer {
         break;
       }
 
+      // Atribuição de valor a variável
       case "Assignment": {
         const symbol = this.simbols[node.id];
 
@@ -248,7 +253,7 @@ class SemanticAnalyzer {
         break;
       }
 
-      // Comando print para saida de
+      // Comando print para saida de dados
       case "PrintStatement": {
         let output = "";
 
@@ -281,6 +286,7 @@ class SemanticAnalyzer {
         break;
       }
 
+      // Comando EXIBIR para entrada de dados
       case "InputStatement": {
         const symbol = this.simbols[node.id];
 
@@ -360,56 +366,137 @@ class SemanticAnalyzer {
         break;
       }
 
-      //
+      // Comando Para repetição
       case "WhileStatement": {
         let iterations = 0;
         const MAX_ITERATIONS = 10000;
 
         while (await this.visit(node.condition)) {
-          // body sempre é um array no seu parser, então não precisa do else
-          for (const stmt of node.body) {
-            await this.visit(stmt);
+          let shouldContinue = false;
+
+          try {
+            for (const stmt of node.body) {
+              await this.visit(stmt);
+            }
+          } catch (signal) {
+            if (signal instanceof BreakSignal) {
+              break;
+            }
+
+            if (signal instanceof ContinueSignal) {
+              shouldContinue = true;
+            } else {
+              throw signal;
+            }
           }
 
           iterations++;
-          if (iterations > MAX_ITERATIONS)
+          if (iterations > MAX_ITERATIONS) {
             throw new Error("Loop ENQUANTO excedeu 10000 iterações.");
+          }
+
+          if (shouldContinue) {
+            continue;
+          }
         }
+
         break;
       }
 
       case "ForStatement": {
-        const cond = await this.visit(node.condition);
         let iterations = 0;
         const MAX_ITERATIONS = 10000;
+
+        // Inicialização
         await this.visit(node.init);
-        iterations = 0;
-        while (await this.visit(node.condition)) {
-          for (const stmt of node.body) {
-            await this.visit(stmt);
+
+        while (true) {
+          // Condição
+          const cond = await this.visit(node.condition);
+          if (!cond) break;
+
+          let shouldContinue = false;
+
+          try {
+            for (const stmt of node.body) {
+              await this.visit(stmt);
+            }
+          } catch (signal) {
+            if (signal instanceof BreakSignal) {
+              break;
+            }
+
+            if (signal instanceof ContinueSignal) {
+              shouldContinue = true;
+            } else {
+              throw signal;
+            }
           }
+
+          // Incremento (SEMPRE EXECUTA)
           await this.visit(node.increment);
+
           iterations++;
-          if (iterations > MAX_ITERATIONS)
+          if (iterations > MAX_ITERATIONS) {
             throw new Error("Loop PARA excedeu 10000 iterações.");
+          }
+
+          if (shouldContinue) {
+            continue;
+          }
         }
+
         break;
       }
 
       case "DoWhileStatement": {
         let iterations = 0;
         const MAX_ITERATIONS = 10000;
+
         do {
-          for (const stmt of node.body) {
-            await this.visit(stmt);
+          let shouldContinue = false;
+
+          try {
+            for (const stmt of node.body) {
+              await this.visit(stmt);
+            }
+          } catch (signal) {
+            if (signal instanceof BreakSignal) {
+              break;
+            }
+
+            if (signal instanceof ContinueSignal) {
+              shouldContinue = true;
+            } else {
+              throw signal;
+            }
           }
+
           iterations++;
-          if (iterations > MAX_ITERATIONS)
+          if (iterations > MAX_ITERATIONS) {
             throw new Error("Loop FACA...ENQUANTO excedeu 10000 iterações.");
+          }
+
+          // continue no do...while cai aqui
+          if (shouldContinue) {
+            // não faz nada, apenas deixa cair para a condição
+          }
         } while (await this.visit(node.condition));
+
         break;
       }
 
+      // Controle de fluxo - PARAR
+      case "BreakStatement": {
+        throw new BreakSignal();
+      }
+
+      // Controle de fluxo - CONTINUAR
+      case "ContinueStatement": {
+        throw new ContinueSignal();
+      }
+
+      // Operações matemáticas especiais
       case "CalcStatement": {
         const operation = node.operation; // "RAIZ" ou "EXPOENTE"
         const args = node.arguments;

@@ -79,6 +79,14 @@ class Parser {
       TokenType.SENAO,
       TokenType.VERDADEIRO,
       TokenType.FALSO,
+      TokenType.ENQUANTO,
+      TokenType.FACA,
+      TokenType.PARA,
+      TokenType.INSERIR,
+      TokenType.RAIZ,
+      TokenType.EXPOENTE,
+      TokenType.CONTINUAR,
+      TokenType.PARAR,
     ];
     if (token.type !== TokenType.IDENTIFICADOR) {
       const errorMsg = reservedKeywords.includes(token.type)
@@ -413,6 +421,34 @@ class Parser {
     return this.expr();
   }
 
+
+  // Comandos de controle de fluxo
+  // Comando PARAR
+  private BreakStatement(): ASTNode {
+    const breakToken = this.currentToken;
+    this.eat(TokenType.PARAR);
+    this.eat(TokenType.PONTO);
+
+    return {
+      type: "BreakStatement",
+      linha: breakToken.linha,
+      coluna: breakToken.coluna,
+    };
+  }
+  // Comando CONTINUAR
+  private parseContinueStatement(): ASTNode {
+  const token = this.currentToken;
+  this.eat(TokenType.CONTINUAR);
+  this.eat(TokenType.PONTO);
+
+  return {
+    type: "ContinueStatement",
+    linha: token.linha,
+    coluna: token.coluna,
+  };
+}
+    
+
   private seStatement(): ASTNode {
     // Consome o 'SE'
     this.eat(TokenType.SE);
@@ -708,6 +744,12 @@ class Parser {
       case TokenType.FACA:
         return this.parseDoWhileStatement();
 
+      case TokenType.PARAR:
+        return this.BreakStatement();
+
+      case TokenType.CONTINUAR:
+        return this.parseContinueStatement();
+        
       case TokenType.RAIZ:
       case TokenType.EXPOENTE:
         return this.CalcStatement();
