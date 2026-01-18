@@ -20,7 +20,7 @@ class SemanticAnalyzer {
   constructor(
     filename: string = "code.sa",
     printCallback: (message: string) => void = console.log,
-    inputCallback?: (prompt: string) => Promise<string>
+    inputCallback?: (prompt: string) => Promise<string>,
   ) {
     this.filename = filename;
     this.printCallback = printCallback;
@@ -408,6 +408,40 @@ class SemanticAnalyzer {
             throw new Error("Loop FACA...ENQUANTO excedeu 10000 iterações.");
         } while (await this.visit(node.condition));
         break;
+      }
+
+      case "CalcStatement": {
+        const operation = node.operation; // "RAIZ" ou "EXPOENTE"
+        const args = node.arguments;
+
+        if (args.length !== 2) {
+          throw new Error(
+            `CalcStatement precisa de 2 argumentos, encontrou ${args.length}`,
+          );
+        }
+
+        // Avalia os dois argumentos
+        const arg1 = await this.visit(args[0]); // pode ser qualquer expressão
+        const arg2 = await this.visit(args[1]); // idem
+
+        let result: number;
+
+        switch (operation) {
+          case "RAIZ":
+            if (arg2 === 0)
+              throw new Error("Não é possível calcular raiz de índice zero.");
+            result = Math.pow(arg1, 1 / arg2);
+            break;
+
+          case "EXPOENTE":
+            result = Math.pow(arg1, arg2);
+            break;
+
+          default:
+            throw new Error(`Operação desconhecida: ${operation}`);
+        }
+
+        return result;
       }
 
       // Valor literal

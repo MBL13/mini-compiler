@@ -69,7 +69,14 @@ enum TokenType {
 
   //   Operador de atribuição
   ATRIBUICAO = "ATRIBUICAO", // Operador de atribuição '='
+
+
+  // Novos operadores matemáticos
+  RAIZ = "RAIZ", // Operador raiz quadrada '√'
+  EXPOENTE = "EXPOENTE", // Operador de exponenciação '^'
 }
+
+
 
 /**
  * Estrutura de um Token.

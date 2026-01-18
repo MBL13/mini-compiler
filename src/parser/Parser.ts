@@ -178,6 +178,10 @@ class Parser {
       };
     }
 
+    if (token.type === TokenType.RAIZ || token.type === TokenType.EXPOENTE) {
+      return this.CalcStatement();
+    }
+
     if (token.type === TokenType.EOF)
       throw new Error(
         this.formatError(
@@ -627,6 +631,52 @@ class Parser {
     };
   }
 
+  private CalcStatement(): ASTNode {
+    const calcToken = this.currentToken;
+    const args: ASTNode[] = [];
+
+    if (this.currentToken.type === TokenType.RAIZ) {
+      this.eat(TokenType.RAIZ);
+      this.eat(TokenType.PARENTESE_ESQUERDO);
+
+      // Primeiro argumento: pode ser uma expressão
+      args.push(this.expr());
+
+      this.eat(TokenType.VIRGULA);
+
+      // Segundo argumento: pode ser uma expressão
+      args.push(this.expr());
+
+      this.eat(TokenType.PARENTESE_DIREITO);
+    } else if (this.currentToken.type === TokenType.EXPOENTE) {
+      this.eat(TokenType.EXPOENTE);
+      this.eat(TokenType.PARENTESE_ESQUERDO);
+
+      // Primeiro argumento: pode ser uma expressão
+      args.push(this.expr());
+
+      this.eat(TokenType.VIRGULA);
+
+      // Segundo argumento: pode ser uma expressão
+      args.push(this.expr());
+
+      this.eat(TokenType.PARENTESE_DIREITO);
+      // this.eat(TokenType.PONTO);
+    } else {
+      throw new Error(
+        this.formatError("Erro Sintático", "Esperado RAIZ ou EXPOENTE"),
+      );
+    }
+
+    return {
+      type: "CalcStatement",
+      operation: calcToken.type, // RAIZ ou EXPOENTE
+      arguments: args, // lista de expressões
+      linha: calcToken.linha,
+      coluna: calcToken.coluna,
+    };
+  }
+
   private statement(): ASTNode {
     switch (this.currentToken.type) {
       case TokenType.VAR:
@@ -657,6 +707,10 @@ class Parser {
         return this.parseForStatement();
       case TokenType.FACA:
         return this.parseDoWhileStatement();
+
+      case TokenType.RAIZ:
+      case TokenType.EXPOENTE:
+        return this.CalcStatement();
       default:
         throw new Error(
           this.formatError(

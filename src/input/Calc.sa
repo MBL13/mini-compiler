@@ -1,0 +1,11 @@
+VAR a : REAL.
+a = 25.
+EXIBIR("RAIZ DE:",a).
+a = RAIZ((20,98) ,2).
+EXIBIR(a).
+
+VAR b: REAL.
+b=5.
+EXIBIR("EXPOENTE DE:",b).
+b = EXPOENTE(b ,2).
+EXIBIR(b).

@@ -649,6 +649,25 @@ class Lexer {
           };
         }
 
+        // Outros operadores matemáticos
+        if (word === "RAIZ") {
+          return {
+            type: TokenType.RAIZ,
+            value: word,
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
+
+        if (word === "EXPOENTE") {
+          return {
+            type: TokenType.EXPOENTE,
+            value: word,
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
+
         // Validação de palavras reservadas "erradas" (ex: VARc, REALx)
         const keywords = [
           "VAR",
@@ -666,6 +685,11 @@ class Lexer {
           "E",
           "OU",
           "NAO",
+          "RAIZ",
+          "EXPOENTE",
+          "ENQUANTO",
+          "FACA",
+          "PARA",
         ];
         for (const kw of keywords) {
           if (word.startsWith(kw) && word !== kw) {
