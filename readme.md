@@ -56,7 +56,7 @@ mini-compiler/
 │   ├── lexer/        # Analisador Léxico
 │   ├── parser/       # Analisador Sintático
 │   ├── semantic/     # Analisador Semântico
-│   └── index.ts      # SEMICOLON de entrada
+│   └── index.ts      # PONTO de entrada
 │
 ├── package.json
 ├── tsconfig.json
@@ -79,7 +79,7 @@ A linguagem implementada no projecto suporta:
 ```
 VAR x = 3: INTEIRO.
 VAR y = x / 1: INTEIRO.
-EXIBIR y.
+EXIBIR(y).
 ```
 
 ---

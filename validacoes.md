@@ -25,23 +25,42 @@ Abaixo estão listadas as validações de erro do sistema, organizadas por etapa
     *   **Descrição:** Uma string foi aberta com aspas `"` mas a linha ou arquivo terminou antes de fechar.
     *   **Exemplo:** `"Texto sem fim`
 
+*   **Limite de Tamanho Excedido**
+    *   **Descrição:** Números (máximo 15 dígitos) ou Strings (máximo 500 caracteres) excederam o limite permitido.
+    *   **Exemplo:** `1234567890123456` ou uma string com mais de 500 letras.
+
+*   **Comentário em Bloco Não Fechado**
+    *   **Descrição:** Um comentário iniciado com `/*` não foi encerrado com `*/`.
+    *   **Exemplo:** `/* Comentário esquecido...`
+
 ---
 
 ## 2. Analisador Sintático (Parser)
 *Erros na estrutura e gramática das frases.*
 
-*   **Erro Sintático**
-    *   **Descrição:** A ordem dos tokens está incorreta (ex: esperava dois pontos, veio um ponto e vírgula).
-    *   **Exemplo:** `esperado :, encontrado ;`
+*   **Erro Sintático (Faltou Ponto Final)**
+    *   **Descrição:** O compilador detectou que uma linha de comando não terminou com o ponto final (`.`).
+    *   **Exemplo:** `VAR x = 10 : INTEIRO` (sem o ponto no final).
 
-*   **Comando Inválido**
-    *   **Descrição:** Uma instrução começou com um token inesperado. O erro agora exibe qual token causou o problema.
-    *   **Exemplo:** `Comando inválido: 10`
+*   **Tipo de Variável Não Declarado / Inválido**
+    *   **Descrição:** Declaração de variável sem especificar o tipo após os dois pontos (`:`) ou com um tipo desconhecido.
+    *   **Exemplo:** `VAR x = 10 : .` ou `VAR x = 10 : COISA.`
 
-*   **Tipo de Variável Inválido**
-    *   **Descrição:** Declaração de variável com um tipo desconhecido ou mal formatado. O erro especifica o tipo inválido encontrado.
-    *   **Exemplo:** `Tipo de variável inválido: COISA`
-    *   **Tipos Válidos:** `INTEIRO`, `REAL`, `NATURAL`, `TEXTO`
+*   **Erro de Tipo (TEXTO)**
+    *   **Descrição:** Tentativa de atribuir valor não-string a variável do tipo TEXTO.
+    *   **Exemplo:** `VAR x = 10 : TEXTO.` → Variável do tipo TEXTO deve receber uma string entre aspas.
+
+*   **Erro de Tipo (LOGICO)**
+    *   **Descrição:** Tentativa de atribuir valor não-booleano a variável do tipo LOGICO.
+    *   **Exemplo:** `VAR x = "ola" : LOGICO.` → Variável do tipo LOGICO deve receber VERDADEIRO ou FALSO.
+
+*   **Erro de Tipo (NATURAL)**
+    *   **Descrição:** Tentativa de atribuir número negativo a variável do tipo NATURAL (verificação sintática).
+    *   **Exemplo:** `VAR x = -5 : NATURAL.` → Variável do tipo NATURAL não pode receber número negativo.
+
+*   **Fator Inválido**
+    *   **Descrição:** Token inesperado em uma expressão aritmética ou lógica. Antigamente chamado de "Factor Inválido".
+    *   **Exemplo:** `VAR x = 10 + * 5 : INTEIRO.`
 
 ---
 
@@ -63,3 +82,19 @@ Abaixo estão listadas as validações de erro do sistema, organizadas por etapa
 *   **Divisão por Zero**
     *   **Descrição:** Operação matemática proibida.
     *   **Exemplo:** `10 / 0`
+
+*   **Operador sem operando**
+    *   **Descrição:** Faltou um operando à direita de um operador.
+    *   **Exemplo:** `VAR x = 10 + .`
+
+*   **Expressão vazia**
+    *   **Descrição:** O comando `EXIBIR` foi chamado com parênteses vazios.
+    *   **Exemplo:** `EXIBIR().`
+
+*   **EXIBIR sem parênteses**
+    *   **Descrição:** O comando `EXIBIR` foi usado sem parênteses.
+    *   **Exemplo:** `EXIBIR x.`
+
+*   **Tipo incompatível em expressão aritmética**
+    *   **Descrição:** Tenta realizar operações aritméticas entre tipos incompatíveis (ex: texto e número).
+    *   **Exemplo:** `VAR x = "abc" + 10 : TEXTO.`
