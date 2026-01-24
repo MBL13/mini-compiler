@@ -18,7 +18,7 @@ function executarTestes(diretorio, devePassar) {
     const arquivos = fs.readdirSync(diretorio).filter(f => f.endsWith('.txt'));
     let acertos = 0;
 
-    console.log(`\n--- 📂 Categoria: ${devePassar ? 'VÁLIDOS' : 'INVÁLIDOS'} ---`);
+    console.log(`\n--- Categoria: ${devePassar ? 'VÁLIDOS' : 'INVÁLIDOS'} ---`);
 
     arquivos.forEach(arquivo => {
         // 2. O path.resolve cria o caminho completo e sem erros
@@ -42,7 +42,7 @@ function executarTestes(diretorio, devePassar) {
                 console.log(`   ❌ [FALHA] ${arquivo}: O compilador rejeitou um código válido.`);
                 // Mostra o erro real se algo der errado:
                 const erroReal = error.stderr ? error.stderr.toString() : error.message;
-                console.log(`      👉 Erro: ${erroReal.split('\n')[0]}`);
+                console.log(`      Erro: ${erroReal.split('\n')[0]}`);
             }
         }
     });
@@ -50,7 +50,7 @@ function executarTestes(diretorio, devePassar) {
     return { total: arquivos.length, acertos };
 }
 
-console.log("🔍 Iniciando Validação...");
+console.log(" Iniciando Validação...");
 const v = executarTestes(VALID_DIR, true);
 const i = executarTestes(INVALID_DIR, false);
 
