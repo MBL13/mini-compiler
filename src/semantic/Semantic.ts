@@ -818,7 +818,7 @@ class SemanticAnalyzer {
     if (props.altura) style += `height: ${props.altura}; `;
     if (props.borda) style += `border: ${props.borda}; `;
     if (props.margem) style += `margin: ${props.margem}; `;
-    if (props.padding) style += `padding: ${props.padding}; `;
+    if (props.espacamento_interno) style += `padding: ${props.espacamento_interno}; `;
     if (props.mostrar) style += `display: ${props.mostrar}; `;
     if (props.direcao_flex) style += `flex-direction: ${props.direcao_flex}; `; 
     if (props.justificar) style += `justify-content: ${props.justificar}; `;
