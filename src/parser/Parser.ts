@@ -183,12 +183,31 @@ class Parser {
       return this.parenthesizedExpr();
     if (token.type === TokenType.IDENTIFICADOR) {
       this.eat(TokenType.IDENTIFICADOR);
-      return {
+      let node: ASTNode = {
         type: "IDENTIFICADOR",
         name: token.value,
         linha: token.linha,
         coluna: token.coluna,
       };
+
+      // Acesso por índice: id[index]
+      while (this.currentToken.type === TokenType.COLCHETE_ESQUERDO) {
+        this.eat(TokenType.COLCHETE_ESQUERDO);
+        const index = this.expr();
+        this.eat(TokenType.COLCHETE_DIREITO);
+        node = {
+          type: "IndexAccess",
+          object: node,
+          index,
+          linha: token.linha,
+          coluna: token.coluna,
+        };
+      }
+      return node;
+    }
+
+    if (token.type === TokenType.COLCHETE_ESQUERDO) {
+      return this.parseListLiteral();
     }
 
     if (token.type === TokenType.RAIZ || token.type === TokenType.EXPOENTE) {
@@ -325,6 +344,7 @@ class Parser {
       TokenType.NATURAL,
       TokenType.TEXTO,
       TokenType.LOGICO,
+      TokenType.LISTA,
     ];
 
     if (!validTypes.includes(varTypeToken.type)) {
@@ -357,25 +377,62 @@ class Parser {
     };
   }
 
-  private parseAssignment(expectDot: boolean = true): ASTNode {
-    const idToken = this.currentToken;
-    const varName = idToken.value;
-    this.eat(TokenType.IDENTIFICADOR);
+  private parseAssignment(expectDot: boolean = true, targetNode?: ASTNode): ASTNode {
+    const idToken = targetNode ? { linha: targetNode.linha, coluna: targetNode.coluna, value: (targetNode as any).id || (targetNode as any).name } : this.currentToken;
 
-    this.eat(TokenType.ATRIBUICAO); // consome '='
-    const value = this.expr();
+    let target: ASTNode;
+    if (targetNode) {
+      target = targetNode;
+    } else {
+      const name = idToken.value;
+      this.eat(TokenType.IDENTIFICADOR);
+      target = { type: "IDENTIFICADOR", name };
+      if (idToken.linha) target.linha = idToken.linha;
+      if (idToken.coluna) target.coluna = idToken.coluna;
+    }
+
+    const operatorToken = this.currentToken;
+    const operator = operatorToken.type;
+
+    let node: ASTNode;
+
+    if (operator === TokenType.INCREMENTO || operator === TokenType.DECREMENTO) {
+      this.eat(operator);
+      node = {
+        type: "UpdateStatement",
+        target,
+        operator: operator === TokenType.INCREMENTO ? "++" : "--",
+      };
+      if (idToken.linha) node.linha = idToken.linha;
+      if (idToken.coluna) node.coluna = idToken.coluna;
+    } else if (operator === TokenType.MAIS_IGUAL || operator === TokenType.MENOS_IGUAL) {
+      this.eat(operator);
+      const value = this.expr();
+      node = {
+        type: "UpdateStatement",
+        target,
+        operator: operator === TokenType.MAIS_IGUAL ? "+=" : "-=",
+        value,
+      };
+      if (idToken.linha) node.linha = idToken.linha;
+      if (idToken.coluna) node.coluna = idToken.coluna;
+    } else {
+      this.eat(TokenType.ATRIBUICAO);
+      const value = this.expr();
+      node = {
+        type: "Assignment",
+        target,
+        value,
+      };
+      if (idToken.linha) node.linha = idToken.linha;
+      if (idToken.coluna) node.coluna = idToken.coluna;
+    }
 
     if (expectDot) {
       this.eat(TokenType.PONTO); // só consome ponto se necessário
     }
 
-    return {
-      type: "Assignment",
-      id: varName,
-      value,
-      linha: idToken.linha,
-      coluna: idToken.coluna,
-    };
+    return node;
   }
 
   private parsePrintStatement(): ASTNode {
@@ -424,6 +481,29 @@ class Parser {
 
     // opcional: permitir expressões
     return this.expr();
+  }
+
+  private parseListLiteral(): ASTNode {
+    const startToken = this.currentToken;
+    this.eat(TokenType.COLCHETE_ESQUERDO);
+    const elements: ASTNode[] = [];
+
+    if (this.currentToken.type !== TokenType.COLCHETE_DIREITO) {
+      elements.push(this.expr());
+      while (this.currentToken.type === TokenType.VIRGULA) {
+        this.eat(TokenType.VIRGULA);
+        elements.push(this.expr());
+      }
+    }
+
+    this.eat(TokenType.COLCHETE_DIREITO);
+
+    return {
+      type: "ListLiteral",
+      elements,
+      linha: startToken.linha,
+      coluna: startToken.coluna,
+    };
   }
 
   /* ==================== WEB COMPONENTS ==================== */
@@ -833,14 +913,17 @@ class Parser {
       case TokenType.SE:
         return this.seStatement();
       case TokenType.IDENTIFICADOR:
-        // Se o identificador é seguido de '=', é uma atribuição
-        if (this.lexer.peekNextToken().type === TokenType.ATRIBUICAO) {
-          return this.parseAssignment();
+        const factorNode = this.factor();
+        const nextType = this.currentToken.type;
+
+        if ([TokenType.ATRIBUICAO, TokenType.INCREMENTO, TokenType.DECREMENTO, TokenType.MAIS_IGUAL, TokenType.MENOS_IGUAL].includes(nextType)) {
+          return this.parseAssignment(true, factorNode);
         }
+
         throw new Error(
           this.formatError(
             "Comando Inválido",
-            `Esperado '=' após ${this.currentToken.value}`,
+            `Esperado operador de atribuição ou atualização após expressão`,
           ),
         );
 

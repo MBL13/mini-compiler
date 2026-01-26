@@ -92,6 +92,26 @@ class Lexer {
 
       // Mapeamento de caracteres individuais para seus respectivos tokens
       if (char === "+") {
+        if (this.peekNext() === "+") {
+          this.advance();
+          this.advance();
+          return {
+            type: TokenType.INCREMENTO,
+            value: "++",
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
+        if (this.peekNext() === "=") {
+          this.advance();
+          this.advance();
+          return {
+            type: TokenType.MAIS_IGUAL,
+            value: "+=",
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
         this.advance();
         return {
           type: TokenType.MAIS,
@@ -175,6 +195,26 @@ class Lexer {
       }
 
       if (char === "-") {
+        if (this.peekNext() === "-") {
+          this.advance();
+          this.advance();
+          return {
+            type: TokenType.DECREMENTO,
+            value: "--",
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
+        if (this.peekNext() === "=") {
+          this.advance();
+          this.advance();
+          return {
+            type: TokenType.MENOS_IGUAL,
+            value: "-=",
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
         this.advance();
         return {
           type: TokenType.MENOS,
@@ -248,6 +288,24 @@ class Lexer {
         return {
           type: TokenType.PARENTESE_DIREITO,
           value: ")",
+          linha: tokenInicioLinha,
+          coluna: tokenInicioColuna,
+        };
+      }
+      if (char === "[") {
+        this.advance();
+        return {
+          type: TokenType.COLCHETE_ESQUERDO,
+          value: "[",
+          linha: tokenInicioLinha,
+          coluna: tokenInicioColuna,
+        };
+      }
+      if (char === "]") {
+        this.advance();
+        return {
+          type: TokenType.COLCHETE_DIREITO,
+          value: "]",
           linha: tokenInicioLinha,
           coluna: tokenInicioColuna,
         };
@@ -550,6 +608,13 @@ class Lexer {
             linha: tokenInicioLinha,
             coluna: tokenInicioColuna,
           };
+        if (word === "LISTA")
+          return {
+            type: TokenType.LISTA,
+            value: word,
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
         if (word === "LOGICO")
           return {
             type: TokenType.LOGICO,
@@ -761,7 +826,7 @@ class Lexer {
           "FUNCAO",
           "PUBLICO",
           "PRIVADO",
-          "PROTEJIDO"
+          "PROTEGIDO"
         ];
         for (const kw of keywords) {
           if (word.startsWith(kw) && word !== kw) {

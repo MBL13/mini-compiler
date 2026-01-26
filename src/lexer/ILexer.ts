@@ -24,7 +24,7 @@ enum TokenType {
   NATURAL = "NATURAL", // Tipo de dado natural (não negativo)
   REAL = "REAL", // Tipo de dado real (PONTO flutuante)
   TEXTO = "TEXTO", // Tipo de dado texto (string)
-
+  LISTA = "LISTA", // Tipo de dado lista (array)
   CARACTER = "CARACTER", // Tipo de dado caracter (char)
 
   // lOGICOS
@@ -70,6 +70,10 @@ enum TokenType {
 
   //   Operador de atribuição
   ATRIBUICAO = "ATRIBUICAO", // Operador de atribuição '='
+  MAIS_IGUAL = "MAIS_IGUAL", // '+='
+  MENOS_IGUAL = "MENOS_IGUAL", // '-='
+  INCREMENTO = "INCREMENTO", // '++'
+  DECREMENTO = "DECREMENTO", // '--'
 
 
   // Novos operadores matemáticos
