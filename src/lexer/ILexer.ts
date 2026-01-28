@@ -37,6 +37,12 @@ enum TokenType {
   SENAO = "SENAO", // Palavra-chave 'SENAO'
 
 
+  // Seleção múltipla
+  ESCOLHA = "ESCOLHA", // Palavra-chave 'ESCOLHA'
+  CASO = "CASO", // Palavra-chave 'CASO'
+  PADRAO = "PADRAO", // Palavra-chave 'PADRAO'
+
+
   // Estrutura de repetição
   ENQUANTO = "ENQUANTO", // Palavra-chave 'ENQUANTO'
   FACA = "FACA", // Palavra-chave 'FACA'
@@ -89,8 +95,10 @@ enum TokenType {
   // Funcões
   FUNCAO = "FUNCAO", // Palavra-chave 'FUNCAO'
   RETORNAR = "RETORNAR", // Palavra-chave 'RETORNAR'
-  VAZIO = "VAZIO", // Tipo de retorno vazio
-}
+  VAZIA = "VAZIA", // Tipo de retorno vazio
+
+
+  }
 
 
 

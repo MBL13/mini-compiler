@@ -396,6 +396,7 @@ class Lexer {
         };
       }
 
+
       // Capturar textos entre aspas duplas
 
       if (char === '"') {
@@ -640,6 +641,15 @@ class Lexer {
           };
         }
 
+        if (word === "VAZIA"){
+          return {
+            type: TokenType.VAZIA,
+            value: word,
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
+
         if (word === "SE") {
           return {
             type: TokenType.SE,
@@ -769,6 +779,31 @@ class Lexer {
             coluna: tokenInicioColuna,
           };
         }
+        // Seleção múltipla
+        if (word === "ESCOLHA") {
+          return {
+            type: TokenType.ESCOLHA,
+            value: word,
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
+        if (word === "PADRAO") {
+          return {
+            type: TokenType.PADRAO,
+            value: word,
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
+        if (word === "CASO") {
+          return{
+            type: TokenType.CASO,
+            value: word,
+            linha: tokenInicioLinha,
+            coluna: tokenInicioColuna,
+          };
+        }
 
         // Validação de palavras reservadas "erradas" (ex: VARc, REALx)
         const keywords = [
@@ -800,7 +835,11 @@ class Lexer {
           "PRIVADO",
           "PROTEGIDO",
           "RETORNAR",
-          "FUNCAO"
+          "FUNCAO",
+          "CASO",
+          "PADRAO",
+          "ESCOLHA",
+          "VAZIA"
         ];
         for (const kw of keywords) {
           if (word.startsWith(kw) && word !== kw) {

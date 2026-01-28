@@ -7,9 +7,8 @@ SE (nota >= 18) {
     EXIBIR(n).
     EXIBIR("Bom").
 
-} SENAO SE (nota >= 10) {
+} SE (nota > 10 E nota != 1000) {
     EXIBIR("Suficiente").
 } SENAO {
     EXIBIR("Insuficiente").
 }
-EXIBIR(n).

@@ -2,11 +2,22 @@ import { Token, TokenType } from "../lexer/ILexer";
 import Lexer from "../lexer/Lexer";
 import ASTNode from "./IParser";
 
+interface SwitchNode extends ASTNode {
+  type: "SwitchStatement";
+  controlVar: string;
+  cases: { value: any; body: ASTNode[] }[];
+  defaultBody?: ASTNode[];
+}
+
 class Parser {
   private lexer: Lexer;
   private currentToken: Token;
-  private functionTable: { [key: string]: { returnType: TokenType; parameters: { name: string; type: string }[] } } = {};
-  
+  private functionTable: {
+    [key: string]: {
+      returnType: TokenType;
+      parameters: { name: string; type: string }[];
+    };
+  } = {};
 
   constructor(lexer: Lexer) {
     this.lexer = lexer;
@@ -383,27 +394,27 @@ class Parser {
     return node;
   }
 
-// Retornar um valor
-private parseReturnStatement(): ASTNode {
-  const token = this.currentToken;
-  this.eat(TokenType.RETORNAR);
-  let expression = null;
-  if (this.currentToken.type !== TokenType.PONTO) {
-    // expression = this.expr();
-    expression = this.logicalOr();
-  }
-  if (expression) {
-    this.validateVariableType(token, expression);
-  }
-  this.eat(TokenType.PONTO);
+  // Retornar um valor
+  private parseReturnStatement(): ASTNode {
+    const token = this.currentToken;
+    this.eat(TokenType.RETORNAR);
+    let expression = null;
+    if (this.currentToken.type !== TokenType.PONTO) {
+      // expression = this.expr();
+      expression = this.logicalOr();
+    }
+    if (expression) {
+      this.validateVariableType(token, expression);
+    }
+    this.eat(TokenType.PONTO);
 
-  return {
-    type: "ReturnStatement",
-    expression,
-    linha: token.linha,
-    coluna: token.coluna,
-  };
-}
+    return {
+      type: "ReturnStatement",
+      expression,
+      linha: token.linha,
+      coluna: token.coluna,
+    };
+  }
   // Funcao
 
   private parseFunctionParameters(): { name: string; type: string }[] {
@@ -461,7 +472,7 @@ private parseReturnStatement(): ASTNode {
       TokenType.NATURAL,
       TokenType.TEXTO,
       TokenType.LOGICO,
-      TokenType.VAZIO, // para funções sem retorno
+      TokenType.VAZIA, // para funções sem retorno
     ];
 
     if (!validTypes.includes(typeToken.type)) {
@@ -509,93 +520,189 @@ private parseReturnStatement(): ASTNode {
   }
 
   // Detecta se é uma chamada de função
-private parseCallExpression(): ASTNode {
-  const calleeToken = this.currentToken;
-  this.eat(TokenType.IDENTIFICADOR);
+  private parseCallExpression(): ASTNode {
+    const calleeToken = this.currentToken;
+    this.eat(TokenType.IDENTIFICADOR);
 
-  this.eat(TokenType.PARENTESE_ESQUERDO);
-  const args: ASTNode[] = [];
+    this.eat(TokenType.PARENTESE_ESQUERDO);
+    const args: ASTNode[] = [];
 
-  if (this.currentToken.type !== TokenType.PARENTESE_DIREITO) {
-    args.push(this.expr());
-    while (this.currentToken.type === TokenType.VIRGULA) {
-      this.eat(TokenType.VIRGULA);
+    if (this.currentToken.type !== TokenType.PARENTESE_DIREITO) {
       args.push(this.expr());
+      while (this.currentToken.type === TokenType.VIRGULA) {
+        this.eat(TokenType.VIRGULA);
+        args.push(this.expr());
+      }
     }
-  }
 
-  this.eat(TokenType.PARENTESE_DIREITO);
+    this.eat(TokenType.PARENTESE_DIREITO);
 
-  // Validação de argumentos
-  const func = this.functionTable[calleeToken.value];
-  if (!func) {
-    throw new Error(
-      this.formatError(
-        "Erro de Tipo",
-        `Função '${calleeToken.value}' não declarada`,
-        calleeToken,
-      ),
-    );
-  }
-
-  if (args.length !== func.parameters.length) {
-    throw new Error(
-      this.formatError(
-        "Erro de Tipo",
-        `Função '${calleeToken.value}' espera ${func.parameters.length} argumentos, recebidos ${args.length}`,
-        calleeToken,
-      ),
-    );
-  }
-
-  // Checagem de tipo de cada argumento
-  for (let i = 0; i < args.length; i++) {
-    const parameter = func.parameters[i];
-    if (!parameter) {
+    // Validação de argumentos
+    const func = this.functionTable[calleeToken.value];
+    if (!func) {
       throw new Error(
         this.formatError(
           "Erro de Tipo",
-          `Função '${calleeToken.value}' não possui parâmetro no índice ${i}`,
+          `Função '${calleeToken.value}' não declarada`,
           calleeToken,
         ),
       );
     }
-    const expectedType = parameter.type as TokenType;
-    const arg = args[i];
-    if (!arg) {
+
+    if (args.length !== func.parameters.length) {
       throw new Error(
         this.formatError(
           "Erro de Tipo",
-          `Função '${calleeToken.value}', argumento '${parameter.name}' ausente`,
+          `Função '${calleeToken.value}' espera ${func.parameters.length} argumentos, recebidos ${args.length}`,
           calleeToken,
         ),
       );
     }
-    try {
-      this.validateVariableType(
-        { type: expectedType, linha: calleeToken.linha, coluna: calleeToken.coluna } as Token,
-        arg,
-      );
-    } catch (err) {
-      throw new Error(
-        this.formatError(
-          "Erro de Tipo",
-          `Função '${calleeToken.value}', argumento '${parameter.name}' inválido: ${err instanceof Error ? err.message : String(err)}`,
-          calleeToken,
-        ),
-      );
+
+    // Checagem de tipo de cada argumento
+    for (let i = 0; i < args.length; i++) {
+      const parameter = func.parameters[i];
+      if (!parameter) {
+        throw new Error(
+          this.formatError(
+            "Erro de Tipo",
+            `Função '${calleeToken.value}' não possui parâmetro no índice ${i}`,
+            calleeToken,
+          ),
+        );
+      }
+      const expectedType = parameter.type as TokenType;
+      const arg = args[i];
+      if (!arg) {
+        throw new Error(
+          this.formatError(
+            "Erro de Tipo",
+            `Função '${calleeToken.value}', argumento '${parameter.name}' ausente`,
+            calleeToken,
+          ),
+        );
+      }
+      try {
+        this.validateVariableType(
+          {
+            type: expectedType,
+            linha: calleeToken.linha,
+            coluna: calleeToken.coluna,
+          } as Token,
+          arg,
+        );
+      } catch (err) {
+        throw new Error(
+          this.formatError(
+            "Erro de Tipo",
+            `Função '${calleeToken.value}', argumento '${parameter.name}' inválido: ${err instanceof Error ? err.message : String(err)}`,
+            calleeToken,
+          ),
+        );
+      }
     }
+
+    return {
+      type: "CallExpression",
+      callee: calleeToken.value,
+      arguments: args,
+      linha: calleeToken.linha,
+      coluna: calleeToken.coluna,
+    };
   }
 
-  return {
-    type: "CallExpression",
-    callee: calleeToken.value,
-    arguments: args,
-    linha: calleeToken.linha,
-    coluna: calleeToken.coluna,
-  };
-}
+  // selecçao multipla
+  private parseSwitchStatement(): ASTNode {
+    this.eat(TokenType.ESCOLHA);
+    this.eat(TokenType.PARENTESE_ESQUERDO);
 
+    const control = this.expr(); // valor base do switch, usado se você quiser casos literais simples
+    this.eat(TokenType.PARENTESE_DIREITO);
+    this.eat(TokenType.CHAVE_ESQUERDA);
+
+    const cases: { condition: ASTNode; body: ASTNode[] }[] = [];
+    let defaultCase: ASTNode[] | undefined;
+    const caseValues = new Set<any>();
+    let defaultFound = false;
+
+    while (this.currentToken.type !== TokenType.CHAVE_DIREITA) {
+      if (this.currentToken.type === TokenType.CASO) {
+        cases.push(this.parseCaseStatement(caseValues));
+      } else if (this.currentToken.type === TokenType.PADRAO) {
+        if (defaultFound)
+          throw new Error(
+            this.formatError(
+              "Erro de Switch",
+              "PADRAO só pode ser declarado uma vez",
+            ),
+          );
+        defaultFound = true;
+        defaultCase = this.parseDefaultStatement();
+      } else {
+        throw new Error(
+          this.formatError("Erro de Switch", "Esperado CASO ou PADRAO"),
+        );
+      }
+    }
+
+    this.eat(TokenType.CHAVE_DIREITA);
+
+    return {
+      type: "SwitchStatement",
+      control,
+      cases,
+      defaultCase,
+    };
+  }
+
+  // Análise de casos dentro do switch
+  private parseCaseStatement(existingValues: Set<any>): {
+    condition: ASTNode;
+    body: ASTNode[];
+  } {
+    this.eat(TokenType.CASO);
+
+    // PARA QUALQUER EXPRESSAO LOGICA
+    const exprNode = this.logicalOr();
+
+    // Se for literal, salvamos o valor para evitar valores duplicados
+    if (
+      exprNode.type === "NumberLiteral" ||
+      exprNode.type === "StringLiteral" ||
+      exprNode.type === "BooleanLiteral"
+    ) {
+      const literalValue = exprNode.value;
+      if (existingValues.has(literalValue))
+        throw new Error(`Case '${literalValue}' duplicado`);
+      existingValues.add(literalValue);
+    }
+
+    this.eat(TokenType.DOIS_PONTOS);
+
+    const body: ASTNode[] = [];
+    while (
+      ![TokenType.CASO, TokenType.PADRAO, TokenType.CHAVE_DIREITA].includes(
+        this.currentToken.type,
+      )
+    ) {
+      body.push(this.statement());
+    }
+
+    return { condition: exprNode, body };
+  }
+
+  // Análise do caso padrão dentro do switch
+  private parseDefaultStatement(): ASTNode[] {
+    this.eat(TokenType.PADRAO);
+    this.eat(TokenType.DOIS_PONTOS);
+
+    const body: ASTNode[] = [];
+    while (this.currentToken.type !== TokenType.CHAVE_DIREITA) {
+      body.push(this.statement());
+    }
+
+    return body;
+  }
 
   //   Análise de expressões entre parênteses
   private parenthesizedExpr(): ASTNode {
@@ -1288,6 +1395,9 @@ private parseCallExpression(): ASTNode {
 
       case TokenType.FUNCAO:
         return this.parseFunctionStatement();
+
+      case TokenType.ESCOLHA:
+        return this.parseSwitchStatement();
       default:
         throw new Error(
           this.formatError(

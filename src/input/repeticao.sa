@@ -19,6 +19,7 @@ PARA(i = 0; i < 10; i = i + 1) {
 EXIBIR("Fim do programa").
 
 
-PARA(VAR i=0:INTEIRO; i>n; i++){
-EXIBIR("Ola",i).
-} 
+PARA(VAR j = 0: INTEIRO; j <= 10; j = j + 1) {
+    VAR AC = j : INTEIRO.
+    EXIBIR(AC).
+}

@@ -542,64 +542,124 @@ class SemanticAnalyzer {
         break;
       }
 
-case "CallExpression": {
-  // Buscar a função no escopo
-  const funcSymbol = this.lookupSymbol(node.callee, node);
-  if (!funcSymbol || funcSymbol.type !== "FUNCAO")
-    throw new Error(`Função '${node.callee}' não declarada`);
+      case "CallExpression": {
+        // Buscar a função no escopo
+        const funcSymbol = this.lookupSymbol(node.callee, node);
+        if (!funcSymbol || funcSymbol.type !== "FUNCAO")
+          throw new Error(`Função '${node.callee}' não declarada`);
 
-  const funcNode = funcSymbol.value as FunctionNode;
+        const funcNode = funcSymbol.value as FunctionNode;
 
-  // Verificar quantidade de argumentos
-  if (funcNode.parameters.length !== node.arguments.length)
-    throw new Error(
-      `Função '${node.callee}' espera ${funcNode.parameters.length} argumentos, recebeu ${node.arguments.length}`,
-    );
+        // Verificar quantidade de argumentos
+        if (funcNode.parameters.length !== node.arguments.length)
+          throw new Error(
+            `Função '${node.callee}' espera ${funcNode.parameters.length} argumentos, recebeu ${node.arguments.length}`,
+          );
 
-  // Definir função atual
-  this.currentFunction = {
-    name: funcNode.name,
-    returnType: funcNode.returnType,
-  };
+        // Definir função atual
+        this.currentFunction = {
+          name: funcNode.name,
+          returnType: funcNode.returnType,
+        };
 
-  // Criar escopo da função com os parâmetros
-  this.enterFunctionScope(funcNode.parameters);
+        // Criar escopo da função com os parâmetros
+        this.enterFunctionScope(funcNode.parameters);
 
-  // Atribuir valores passados nos argumentos aos parâmetros
-  for (let i = 0; i < node.arguments.length; i++) {
-    const param = funcNode.parameters[i];
-    if (!param) {
-      throw new Error(`Parâmetro na posição ${i} é indefinido na função '${funcNode.name}'`);
-    }
-    const argValue = await this.visit(node.arguments[i]);
+        // Atribuir valores passados nos argumentos aos parâmetros
+        for (let i = 0; i < node.arguments.length; i++) {
+          const param = funcNode.parameters[i];
+          if (!param) {
+            throw new Error(
+              `Parâmetro na posição ${i} é indefinido na função '${funcNode.name}'`,
+            );
+          }
+          const argValue = await this.visit(node.arguments[i]);
 
-    // Pegar o símbolo do parâmetro 
-    const sym = this.currentScope().lookup(param.name)!;
-    sym.value = argValue;
-  }
-
-  let returnValue: any = null;
-  try {
-    for (const stmt of funcNode.body) {
-      try {
-        await this.visit(stmt);
-      } catch (signal) {
-        if (signal instanceof ReturnSignal) {
-          returnValue = signal.value;
-          break;
-        } else {
-          throw signal;
+          // Pegar o símbolo do parâmetro
+          const sym = this.currentScope().lookup(param.name)!;
+          sym.value = argValue;
         }
+
+        let returnValue: any = null;
+        try {
+          for (const stmt of funcNode.body) {
+            try {
+              await this.visit(stmt);
+            } catch (signal) {
+              if (signal instanceof ReturnSignal) {
+                returnValue = signal.value;
+                break;
+              } else {
+                throw signal;
+              }
+            }
+          }
+        } finally {
+          this.exitFunctionScope();
+          this.currentFunction = undefined;
+        }
+
+        return returnValue;
       }
-    }
-  } finally {
-    this.exitFunctionScope();
-    this.currentFunction = undefined;
-  }
 
-  return returnValue;
-}
+      // ==================== ESCOLHA / SWITCH ====================
+      case "SwitchStatement": {
+        const controlValue = await this.visit(node.control);
 
+        let executing = false; // sinaliza se algum case começou a executar (fallthrough)
+
+        for (const caseNode of node.cases) {
+          let conditionResult = false;
+
+          // Se for literal, compara diretamente com o valor do switch
+          if (
+            caseNode.condition.type === "NumberLiteral" ||
+            caseNode.condition.type === "StringLiteral" ||
+            caseNode.condition.type === "BooleanLiteral"
+          ) {
+            conditionResult = controlValue === caseNode.condition.value;
+          } else {
+            // Avalia a expressão lógica do case
+            conditionResult = await this.visit(caseNode.condition);
+            if (typeof conditionResult !== "boolean") {
+              throw new Error(
+                this.formatError(
+                  "Erro de Tipo",
+                  "Expressão do CASO deve resultar em LOGICO",
+                  caseNode.condition,
+                ),
+              );
+            }
+          }
+
+          // Ativa execução se a expressão for verdadeira ou se já estamos em "fallthrough"
+          if (conditionResult || executing) {
+            executing = true; // mantém execução em casos seguintes (se tiver fallthrough)
+            try {
+              await this.executeBlock(caseNode.body);
+            } catch (signal) {
+              if (signal instanceof BreakSignal) {
+                return; // interrompe o switch
+              }
+              throw signal; // repassa outros sinais
+            }
+          }
+        }
+
+        // Executa PADRAO apenas se nenhum CASO foi executado
+        if (!executing && node.defaultCase) {
+          try {
+            await this.executeBlock(node.defaultCase);
+          } catch (signal) {
+            if (signal instanceof BreakSignal) {
+              return;
+            }
+            throw signal;
+          }
+        }
+
+        return;
+      }
 
       // ==================== EXPRESSÕES ====================
       case "BinaryExpression": {
