@@ -2,13 +2,6 @@ import { Token, TokenType } from "../lexer/ILexer";
 import Lexer from "../lexer/Lexer";
 import ASTNode from "./IParser";
 
-interface SwitchNode extends ASTNode {
-  type: "SwitchStatement";
-  controlVar: string;
-  cases: { value: any; body: ASTNode[] }[];
-  defaultBody?: ASTNode[];
-}
-
 class Parser {
   private lexer: Lexer;
   private currentToken: Token;

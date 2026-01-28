@@ -478,34 +478,48 @@ class SemanticAnalyzer {
 
         this.enterScope();
         try {
-          if (node.type === "ForStatement") await this.visit(node.init);
+          if (node.type === "ForStatement" && node.init) {
+            await this.visit(node.init);
+          }
 
-          do {
+          while (true) {
+            // Verificação de condição pré-execução (While e For)
+            if (node.type !== "DoWhileStatement") {
+              if (!(await this.visit(node.condition))) break;
+            }
+
             try {
               await this.executeBlock(node.body);
             } catch (signal) {
               if (signal instanceof BreakSignal) break;
               if (signal instanceof ContinueSignal) {
-                if (node.type === "ForStatement")
+                if (node.type === "ForStatement" && node.increment) {
                   await this.visit(node.increment);
+                }
+                // No Do-While, a condição é verificada após o corpo, mesmo com continue
+                if (node.type === "DoWhileStatement") {
+                  if (!(await this.visit(node.condition))) break;
+                }
                 continue;
               }
               throw signal;
             }
 
-            if (node.type === "ForStatement") await this.visit(node.increment);
+            // Incremento para o loop For
+            if (node.type === "ForStatement" && node.increment) {
+              await this.visit(node.increment);
+            }
 
-            if (
-              node.type === "WhileStatement" ||
-              node.type === "DoWhileStatement"
-            ) {
+            // Verificação de condição pós-execução (Do-While)
+            if (node.type === "DoWhileStatement") {
               if (!(await this.visit(node.condition))) break;
             }
 
             iterations++;
-            if (iterations > MAX_ITERATIONS)
-              throw new Error(`Loop ${node.type} excedeu 10000 iterações.`);
-          } while (node.type !== "ForStatement");
+            if (iterations > MAX_ITERATIONS) {
+              throw new Error(`Loop ${node.type} excedeu ${MAX_ITERATIONS} iterações.`);
+            }
+          }
         } finally {
           this.outScope();
         }
