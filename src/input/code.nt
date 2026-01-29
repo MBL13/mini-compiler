@@ -1,0 +1,14 @@
+// Comentário de linha
+#define A 10
+#define B 5
+
+/* Comentário
+   de bloco */
+
+#include "test.inc"
+
+let x = 3;
+let y = x / 1;
+
+print A + B;
+print y;
