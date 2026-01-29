@@ -9,14 +9,12 @@ if (process.platform === "win32") {
   }
 }
 
-import fs from "fs";
-import path from "path";
 import readlineSync from "readline-sync";
 import Lexer from "./lexer/Lexer";
 import Parser from "./parser/Parser";
 import SemanticAnalyzer from "./semantic/Semantic";
 import { Preprocessor } from "./Preprocessador/processador";
-
+import { TokenType } from "./lexer/ILexer";
 import fs from "fs";
 import path from "path";
 
@@ -31,10 +29,6 @@ fs.writeFileSync(filePath + ".pp", cleanCode);
 const lexer = new Lexer(cleanCode);
 const parser = new Parser(lexer);
 const ast = parser.parse();
-
-const semantic = new SemanticAnalyzer();
-semantic.execute(ast);
-import { TokenType } from "./lexer/ILexer";
 
 if (process.platform === "win32") {
   process.stdin.setEncoding("utf-8");
