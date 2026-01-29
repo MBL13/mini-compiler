@@ -114,6 +114,10 @@ async function executeFile(filename: string) {
   }
 }
 
+const semantic = new SemanticAnalyzer();
+semantic.execute(ast);
+
+
 // do {
 console.clear(); // Limpa a tela antes de mostrar o menu
 executarMenu();
