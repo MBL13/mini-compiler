@@ -1,16 +1,29 @@
 {
   "name": "mini-compiler",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "bin": "dist/index.js",
   "license": "MIT",
-  "scripts": {
-    "dev": "ts-node ./src/index.ts"
+  "pkg": {
+    "scripts": "dist/**/*.js",
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "dist"
   },
-  "dependencies": {
+  "scripts": {
+    "dev": "ts-node ./src/index.ts",
+    "build": "tsc",
+    "build:exe": "npm run build && pkg . --output mini-compiler.exe"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.6",
+    "@types/readline-sync": "^1.4.8",
+    "pkg": "^5.8.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
-  "devDependencies": {
-    "@types/node": "^25.0.2"
+  "dependencies": {
+    "readline-sync": "^1.4.10"
   }
 }

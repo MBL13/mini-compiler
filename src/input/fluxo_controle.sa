@@ -1,0 +1,14 @@
+VAR nota = 15 : INTEIRO.
+
+SE (nota >= 18) {
+    EXIBIR("Excelente").
+} SENAO SE (nota >= 14) {
+    VAR n = 10: INTEIRO.
+    EXIBIR(n).
+    EXIBIR("Bom").
+
+} SE (nota > 10 E nota != 1000) 
+    EXIBIR("Suficiente").
+} SENAO {
+    EXIBIR("Insuficiente")
+}

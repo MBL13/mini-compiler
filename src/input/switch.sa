@@ -1,0 +1,85 @@
+VAR numero1 : REAL.
+VAR limite : INTEIRO.
+VAR operacao : TEXTO.
+
+FUNCAO TEXTO MENU() {
+    VAR escolha : TEXTO.
+    EXIBIR("1 - TABUADA").
+    EXIBIR("5 - SAIR").
+    EXIBIR("ESCOLHA UMA OPCAO").
+    INSERIR(escolha).
+
+    RETORNAR escolha.
+}
+
+
+
+FUNCAO  VAZIA soma() {
+    EXIBIR("Opção 1 TABUADA").
+    EXIBIR(numero1, " + ", limite, " = ", (numero1 + limite)).
+}
+
+FUNCAO VAZIA  subtracao() {
+    EXIBIR("Opção 2 SUBTRACAO").
+    EXIBIR(numero1, " - ", limite, " = ", (numero1 - limite)).
+}
+
+FUNCAO VAZIA multiplicacao() {
+    EXIBIR("Opção 3 MULTIPLICACAO").
+    EXIBIR(numero1, " x ", limite, " = ", (numero1 * limite)).
+}
+
+FUNCAO VAZIA divisao() {
+    EXIBIR("Opção 4 DIVISAO").
+    SE(limite != 0) {
+        EXIBIR(numero1, " / ", limite, " = ", (numero1 / limite)).
+    } SENAO {
+        EXIBIR("Erro: Divisão por zero").
+    }
+}
+
+FUNCAO VAZIA SAIR() {
+    EXIBIR("SAINDO").
+}
+
+FUNCAO VAZIA INVALIDO() {
+    EXIBIR("Opção inválida").
+}
+
+FUNCAO VAZIA TABUADA() {
+    VAR i : INTEIRO.
+    i = 1.
+    EXIBIR("Tabuada do ", numero1, " até ", limite).
+
+          ENQUANTO (i <= limite){
+        EXIBIR(numero1, " x ", i, " = ", (numero1 * i)).
+        i = i + 1.
+    }
+}
+
+FACA {
+    operacao = MENU().
+
+    ESCOLHA (operacao) {
+        CASO "1":
+            INSERIR("DIGITE O NUMERO PARA TABUADA:", numero1).
+            INSERIR("DIGITE O LIMITE DA TABUADA:", limite).
+            TABUADA().
+            PARAR.
+        CASO "2":
+            EXIBIR("Opção ainda não implementada").
+            PARAR.
+        CASO "3":
+            EXIBIR("Opção ainda não implementada").
+            PARAR.
+        CASO "4":
+            EXIBIR("Opção ainda não implementada").
+            PARAR.
+        CASO "5":
+            SAIR().
+            PARAR.
+        PADRAO:
+            INVALIDO().
+            PARAR.
+    }
+} ENQUANTO(operacao != "5").

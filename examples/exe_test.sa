@@ -1,0 +1,4 @@
+VAR msg : TEXTO.
+INSERIR("Digite algo para testar o EXE:", msg).
+EXIBIR("Voce digitou:").
+EXIBIR(msg).

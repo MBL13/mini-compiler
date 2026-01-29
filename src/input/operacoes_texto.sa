@@ -1,0 +1,15 @@
+# Teste de Strings e Exibição
+
+VAR saudacao = "Olá" : TEXTO.
+VAR nome = "Paulino" : TEXTO.
+
+EXIBIR(saudacao).
+EXIBIR(nome).
+
+VAR msg = "O mini-compiler está funcionando!" : TEXTO.
+EXIBIR(msg).
+
+# Strings vazias e com caracteres especiais
+VAR vazia = "" : TEXTO.
+VAR especial = "123 !@# abc" : TEXTO.
+EXIBIR(especial).
