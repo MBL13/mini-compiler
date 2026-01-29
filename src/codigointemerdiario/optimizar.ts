@@ -1,125 +1,169 @@
+// src/ir/optimizer.ts
 
-
-import { TacInstruction, TacProgram } from './tac';
+import { TacInstruction, TacProgram } from "./tac";
 
 export class TacOptimizer {
+
   optimize(program: TacProgram): TacProgram {
-    let optimized = [...program];  // Cópia
+    let result = [...program];
 
-    // Aplicar propagação de constantes
-    optimized = this.constantPropagation(optimized);
+    result = this.constantPropagation(result);
+    result = this.commonSubexpressionElimination(result);
+    result = this.deadCodeElimination(result);
 
-    // Aplicar eliminação de subexpressões comuns
-    optimized = this.commonSubexpressionElimination(optimized);
-
-    // Aplicar eliminação de código morto (deve ser após as outras)
-    optimized = this.deadCodeElimination(optimized);
-
-    return optimized;
+    return result;
   }
 
+  /* =====================================
+   * Propagação e dobra de constantes
+   * ===================================== */
   private constantPropagation(program: TacProgram): TacProgram {
-    const constants: Map<string, string> = new Map();  // var/temp -> valor constante
+    const constants = new Map<string, string>();
     const newProgram: TacProgram = [];
 
     for (const instr of program) {
-      let arg1 = instr.arg1 ? this.replaceWithConstant(instr.arg1, constants) : undefined;
-      let arg2 = instr.arg2 ? this.replaceWithConstant(instr.arg2, constants) : undefined;
+      const arg1 = instr.arg1 ? this.resolve(instr.arg1, constants) : undefined;
+      const arg2 = instr.arg2 ? this.resolve(instr.arg2, constants) : undefined;
 
-      if (instr.op === '=') {
-        if (arg1 && !isNaN(parseFloat(arg1))) {  // Se arg1 é constante
-          constants.set(instr.result!, arg1);
-        }
-        // Push type-safe, definindo só campos presentes
-        const updatedInstr: TacInstruction = { op: instr.op, result: instr.result };
-        if (arg1 !== undefined) updatedInstr.arg1 = arg1;
-        newProgram.push(updatedInstr);
-      } else if (['+', '-', '*', '/'].includes(instr.op) && arg1 && arg2 && !isNaN(parseFloat(arg1)) && !isNaN(parseFloat(arg2))) {
-        // Avalia se ambos args são constantes (expandido para outros ops)
-        let resultValue: number;
-        switch (instr.op) {
-          case '+': resultValue = parseFloat(arg1) + parseFloat(arg2); break;
-          case '-': resultValue = parseFloat(arg1) - parseFloat(arg2); break;
-          case '*': resultValue = parseFloat(arg1) * parseFloat(arg2); break;
-          case '/': resultValue = parseFloat(arg1) / parseFloat(arg2); break;
-          default: resultValue = NaN;
-        }
-        if (!isNaN(resultValue)) {
-          const resultStr = resultValue.toString();
-          constants.set(instr.result!, resultStr);
+      /* -------- Atribuição -------- */
+      if (instr.op === "=" && instr.result) {
 
-          // Cria nova instrução de forma type-safe, definindo só campos presentes
-          const newInstr: TacInstruction = {
-            op: '=',
-            arg1: resultStr,
-            result: instr.result
-          };
-          newProgram.push(newInstr);
-          continue;
-        }
-      }
-
-      // Fallback para instruções não otimizadas (type-safe)
-      const updatedInstr: TacInstruction = { op: instr.op };
-      if (arg1 !== undefined) updatedInstr.arg1 = arg1;
-      if (arg2 !== undefined) updatedInstr.arg2 = arg2;
-      if (instr.result !== undefined) updatedInstr.result = instr.result;
-      newProgram.push(updatedInstr);
-    }
-    return newProgram;
-  }
-
-  private replaceWithConstant(varName: string, constants: Map<string, string>): string {
-    return constants.has(varName) ? constants.get(varName)! : varName;
-  }
-
-  private commonSubexpressionElimination(program: TacProgram): TacProgram {
-    const exprToTemp: Map<string, string> = new Map();  // chave: 'op arg1 arg2' -> temp
-    const newProgram: TacProgram = [];
-
-    for (const instr of program) {
-      if (instr.op !== '=' && instr.op !== 'print' && instr.arg1 && instr.arg2 && instr.result) {  // Para ops como +, -, etc.
-        const key = `${instr.op} ${instr.arg1} ${instr.arg2}`;
-        if (exprToTemp.has(key)) {
-          // Substitui por temp existente (type-safe)
-          const newInstr: TacInstruction = {
-            op: '=',
-            arg1: exprToTemp.get(key)!,
-            result: instr.result
-          };
-          newProgram.push(newInstr);
-          continue;
+        if (arg1 !== undefined && this.isConstant(arg1)) {
+          constants.set(instr.result, arg1);
         } else {
-          exprToTemp.set(key, instr.result);
+          constants.delete(instr.result);
         }
+
+        const updatedInstr: TacInstruction = {
+          op: instr.op,
+          result: instr.result,
+        };
+        
+        if (arg1 !== undefined) updatedInstr.arg1 = arg1;
+        if (arg2 !== undefined) updatedInstr.arg2 = arg2;
+        
+        newProgram.push(updatedInstr);
+        
+        continue;
       }
-      // Push da instrução original ou atualizada (type-safe)
-      const updatedInstr: TacInstruction = { op: instr.op };
-      if (instr.arg1 !== undefined) updatedInstr.arg1 = instr.arg1;
-      if (instr.arg2 !== undefined) updatedInstr.arg2 = instr.arg2;
-      if (instr.result !== undefined) updatedInstr.result = instr.result;
-      newProgram.push(updatedInstr);
+
+      /* -------- Expressões -------- */
+      if (this.isArithmetic(instr.op) && arg1 && arg2 && this.isConstant(arg1) && this.isConstant(arg2)) {
+
+        const value = this.eval(instr.op, arg1, arg2);
+        constants.set(instr.result!, value);
+
+        const updatedInstr: TacInstruction = {
+          op: instr.op,
+        };
+        
+        if (arg1 !== undefined) updatedInstr.arg1 = arg1;
+        if (arg2 !== undefined) updatedInstr.arg2 = arg2;
+        if (instr.result !== undefined) updatedInstr.result = instr.result;
+        
+        newProgram.push(updatedInstr);
+        
+        continue;
+      }
+
+      /* -------- Fallback -------- */
+      const instrCopy: TacInstruction = { op: instr.op };
+      if (arg1 !== undefined) instrCopy.arg1 = arg1;
+      if (arg2 !== undefined) instrCopy.arg2 = arg2;
+      if (instr.result !== undefined) instrCopy.result = instr.result;
+
+      newProgram.push(instrCopy);
     }
+
     return newProgram;
   }
 
+  /* =====================================
+   * Eliminação de subexpressões comuns
+   * ===================================== */
+  private commonSubexpressionElimination(program: TacProgram): TacProgram {
+    const exprMap = new Map<string, string>();
+    const newProgram: TacProgram = [];
+
+    for (const instr of program) {
+
+      if (
+        this.isArithmetic(instr.op) &&
+        instr.arg1 &&
+        instr.arg2 &&
+        instr.result
+      ) {
+        const key = `${instr.op}|${instr.arg1}|${instr.arg2}`;
+
+        if (exprMap.has(key)) {
+          newProgram.push({
+            op: "=",
+            arg1: exprMap.get(key)!,
+            result: instr.result
+          });
+          continue;
+        }
+
+        exprMap.set(key, instr.result);
+      }
+
+      newProgram.push({ ...instr });
+    }
+
+    return newProgram;
+  }
+
+  /* =====================================
+   * Eliminação de código morto
+   * ===================================== */
   private deadCodeElimination(program: TacProgram): TacProgram {
-    const usedVars: Set<string> = new Set();
-    // Passo reverso: marca vars usadas (de print e atribuições que levam a usadas)
+    const used = new Set<string>();
+
     for (let i = program.length - 1; i >= 0; i--) {
-      const instr = program[i];
-      if (!instr) continue;  // Safe-guard para possível undefined, embora o loop deva prevenir
-      if (instr.op === 'print' && instr.arg1) {
-        usedVars.add(instr.arg1);
-      } else if (instr.result && usedVars.has(instr.result)) {
-        if (instr.arg1) usedVars.add(instr.arg1);
-        if (instr.arg2) usedVars.add(instr.arg2);
+      const instr = program[i] as any;
+
+      if (instr.op === "print" && instr.arg1) {
+        used.add(instr.arg1);
+        continue;
+      }
+
+      if (instr.result && used.has(instr.result)) {
+        if (instr.arg1) used.add(instr.arg1);
+        if (instr.arg2) used.add(instr.arg2);
       }
     }
-    // Filtra instruções onde result é usado ou é print
-    return program.filter((instr): instr is TacInstruction => {
-      if (!instr) return false;
-      return instr.op === 'print' || (instr.result && usedVars.has(instr.result));
-    });
+
+    return program.filter(instr =>
+      instr.op === "print" ||
+      (instr.result && used.has(instr.result))
+    );
+  }
+
+  /* =====================================
+   * Utilitários
+   * ===================================== */
+  private resolve(name: string, constants: Map<string, string>): string {
+    return constants.get(name) ?? name;
+  }
+
+  private isConstant(value: string): boolean {
+    return !isNaN(Number(value));
+  }
+
+  private isArithmetic(op: string): boolean {
+    return op === "+" || op === "-" || op === "*" || op === "/";
+  }
+
+  private eval(op: string, a: string, b: string): string {
+    const x = Number(a);
+    const y = Number(b);
+
+    switch (op) {
+      case "+": return (x + y).toString();
+      case "-": return (x - y).toString();
+      case "*": return (x * y).toString();
+      case "/": return (x / y).toString();
+      default: throw new Error(`Operador inválido: ${op}`);
+    }
   }
 }

@@ -8,6 +8,8 @@ import { TokenType } from "./lexer/ILexer";
 import Parser from "./parser/Parser";
 import SemanticAnalyzer from "./semantic/Semantic";
 import { Preprocessor } from "./Preprocessador/processador";
+import { TacGenerator } from "./codigointemerdiario/gerador";
+import { TacOptimizer } from "./codigointemerdiario/optimizar";
 
 // -----------------------------------------------------------------------------
 // Configuração do terminal (Windows / UTF-8)
@@ -101,19 +103,31 @@ async function executarMenu() {
 // Execução de ficheiros
 // -----------------------------------------------------------------------------
 async function executeFile(filename: string) {
-
-const filePath = path.join(inputDir, filename);
-const rawCode = fs.readFileSync(filePath, "utf-8");
-const preprocessor = new Preprocessor([inputDir]);
-const cleanCode = preprocessor.processFile(filePath);
-
-fs.writeFileSync(path.join(outputDir, filename + ".pp"), cleanCode);
+  const filePath = path.join(inputDir, filename);
 
   console.clear();
   console.log(`\x1b[32mExecutando: ${filename}...\x1b[0m\n`);
 
   try {
-    // 1. Lexer para verificação de erros
+    // -------------------------------------------------------------------------
+    // 1. Leitura do código-fonte
+    // -------------------------------------------------------------------------
+    const rawCode = fs.readFileSync(filePath, "utf-8");
+
+    // -------------------------------------------------------------------------
+    // 2. Pré-processamento
+    // -------------------------------------------------------------------------
+    const preprocessor = new Preprocessor([inputDir]);
+    const cleanCode = preprocessor.processFile(filePath);
+
+    fs.writeFileSync(
+      path.join(outputDir, filename + ".pp"),
+      cleanCode
+    );
+
+    // -------------------------------------------------------------------------
+    // 3. Análise Léxica (verificação de erros)
+    // -------------------------------------------------------------------------
     const errorScanner = new Lexer(cleanCode, filename);
     let token = errorScanner.getNextToken();
 
@@ -126,19 +140,44 @@ fs.writeFileSync(path.join(outputDir, filename + ".pp"), cleanCode);
       return;
     }
 
-    // 2. Parser
+    // -------------------------------------------------------------------------
+    // 4. Análise Sintática (AST)
+    // -------------------------------------------------------------------------
     const lexer = new Lexer(cleanCode, filename);
     const parser = new Parser(lexer);
     const ast = parser.parse();
 
-    // 3. Análise Semântica e Execução
+    // -------------------------------------------------------------------------
+    // 5. Geração de Código Intermediário (TAC)
+    // -------------------------------------------------------------------------
+    const generator = new TacGenerator();
+   // const tacOriginal = generator.generate(ast);
+
+    // -------------------------------------------------------------------------
+    // 6. Otimização do TAC
+    // -------------------------------------------------------------------------
+    const optimizer = new TacOptimizer();
+   // const tacOptimized = optimizer.optimize(tacOriginal);
+
+    // (Opcional para debug)
+    // console.log("TAC Original:", tacOriginal);
+    // console.log("TAC Otimizado:", tacOptimized);
+
+    // -------------------------------------------------------------------------
+    // 7. Análise Semântica e Execução
+    // -------------------------------------------------------------------------
     const semantic = new SemanticAnalyzer(filename);
     await semantic.execute(ast);
 
-    console.log(`\n\x1b[32mExecução de ${filename} finalizada com sucesso.\x1b[0m`);
+    console.log(
+      `\n\x1b[32mExecução de ${filename} finalizada com sucesso.\x1b[0m`
+    );
+
   } catch (error: any) {
+    console.error("\x1b[31mErro durante a execução:\x1b[0m");
     console.error(error.message);
   }
 }
+
 
 executarMenu();

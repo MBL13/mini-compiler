@@ -1,1 +1,0 @@
-{"version":3,"file":"gerador.d.ts","sourceRoot":"","sources":["gerador.ts"],"names":[],"mappings":"AAGA,OAAO,EAAkB,UAAU,EAAE,MAAM,OAAO,CAAC;AACnD,OAAO,EAAC,OAAO,EAAC,MAAM,mBAAmB,CAAC;AAQ1C,qBAAa,YAAY;IACvB,OAAO,CAAC,OAAO,CAAkB;IAEjC,QAAQ,CAAC,GAAG,EAAE,OAAO,EAAE,GAAG,UAAU;IAOpC,OAAO,CAAC,KAAK;CA0Bd"}
