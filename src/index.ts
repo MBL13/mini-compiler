@@ -1,6 +1,17 @@
 import { spawnSync } from "child_process";
+import fs from "fs";
+import path from "path";
+import readlineSync from "readline-sync";
 
-// Força o terminal a usar UTF-8 no Windows para suportar acentos
+import Lexer from "./lexer/Lexer";
+import { TokenType } from "./lexer/ILexer";
+import Parser from "./parser/Parser";
+import SemanticAnalyzer from "./semantic/Semantic";
+import { Preprocessor } from "./Preprocessador/processador";
+
+// -----------------------------------------------------------------------------
+// Configuração do terminal (Windows / UTF-8)
+// -----------------------------------------------------------------------------
 if (process.platform === "win32") {
   try {
     spawnSync("chcp", ["65001"], { stdio: "inherit" });
@@ -9,30 +20,11 @@ if (process.platform === "win32") {
   }
 }
 
-import readlineSync from "readline-sync";
-import Lexer from "./lexer/Lexer";
-import Parser from "./parser/Parser";
-import SemanticAnalyzer from "./semantic/Semantic";
-import { Preprocessor } from "./Preprocessador/processador";
-import { TokenType } from "./lexer/ILexer";
-import fs from "fs";
-import path from "path";
-
-const filePath = path.join(__dirname, "input", "code.nt");
-const rawCode = fs.readFileSync(filePath, "utf-8");
-
-const preprocessor = new Preprocessor([path.join(__dirname, "input")]);
-const cleanCode = preprocessor.processFile(filePath);
-
-fs.writeFileSync(filePath + ".pp", cleanCode);
-
-const lexer = new Lexer(cleanCode);
-const parser = new Parser(lexer);
-const ast = parser.parse();
-
 if (process.platform === "win32") {
   process.stdin.setEncoding("utf-8");
 }
+
+
 
 /**
  * PONTO de entrada do compilador.
@@ -44,12 +36,24 @@ if (process.platform === "win32") {
  * Ola Mundo
  */
 
+// -----------------------------------------------------------------------------
+// Configuração de diretório de entrada
+// -----------------------------------------------------------------------------
 const isPkg = (process as any).pkg !== undefined;
+
 const inputDir = isPkg
   ? path.join(path.dirname(process.execPath), "examples")
   : path.join(__dirname, "input");
-var continuar = true
 
+const outputDir = isPkg
+  ? path.join(path.dirname(process.execPath), "output")
+  : path.join(__dirname, "output");
+
+var continuar = true;
+
+// -----------------------------------------------------------------------------
+// Menu principal
+// -----------------------------------------------------------------------------
 async function executarMenu() {
   const files = fs.readdirSync(inputDir).filter(file => file.endsWith(".sa"));
 
@@ -66,6 +70,7 @@ async function executarMenu() {
   files.forEach((file, index) => {
     console.log(`  \x1b[33m${index + 1}\x1b[0m. ${file}`);
   });
+
   console.log(`  \x1b[33m0\x1b[0m. Sair`);
   console.log("\x1b[36m----------------------------------------\x1b[0m");
 
@@ -74,13 +79,13 @@ async function executarMenu() {
 
   if (choice === "0") {
     console.log("Saindo...");
-    continuar = false
-
+    continuar = false;
     return;
   }
 
   if (index >= 0 && index < files.length) {
     const selectedFile = files[index];
+
     if (selectedFile) {
       await executeFile(selectedFile);
       console.log("\x1b[36m-----------------------------------------------\x1b[0m");
@@ -92,32 +97,41 @@ async function executarMenu() {
   }
 }
 
+// -----------------------------------------------------------------------------
+// Execução de ficheiros
+// -----------------------------------------------------------------------------
 async function executeFile(filename: string) {
-  const filePath = path.join(inputDir, filename);
-  const code = fs.readFileSync(filePath, "utf-8");
 
-  console.clear(); // Limpa a tela antes de executar
+const filePath = path.join(inputDir, filename);
+const rawCode = fs.readFileSync(filePath, "utf-8");
+const preprocessor = new Preprocessor([inputDir]);
+const cleanCode = preprocessor.processFile(filePath);
+
+fs.writeFileSync(path.join(outputDir, filename + ".pp"), cleanCode);
+
+  console.clear();
   console.log(`\x1b[32mExecutando: ${filename}...\x1b[0m\n`);
 
   try {
-    // 1. Instância do Lexer para pré-análise de erros
-    const errorScanner = new Lexer(code, filename);
+    // 1. Lexer para verificação de erros
+    const errorScanner = new Lexer(cleanCode, filename);
     let token = errorScanner.getNextToken();
+
     while (token.type !== TokenType.EOF) {
       token = errorScanner.getNextToken();
     }
 
     if (errorScanner.errors.length > 0) {
-      errorScanner.errors.forEach((err) => console.error(err));
+      errorScanner.errors.forEach(err => console.error(err));
       return;
     }
 
     // 2. Parser
-    const lexer = new Lexer(code, filename);
+    const lexer = new Lexer(cleanCode, filename);
     const parser = new Parser(lexer);
     const ast = parser.parse();
 
-    // 3. Analisador Semântico e Execução
+    // 3. Análise Semântica e Execução
     const semantic = new SemanticAnalyzer(filename);
     await semantic.execute(ast);
 
@@ -127,11 +141,4 @@ async function executeFile(filename: string) {
   }
 }
 
-const semantic = new SemanticAnalyzer();
-semantic.execute(ast);
-
-
-// do {
-console.clear(); // Limpa a tela antes de mostrar o menu
 executarMenu();
-// } while (continuar)
