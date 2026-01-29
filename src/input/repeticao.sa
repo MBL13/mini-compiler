@@ -1,0 +1,41 @@
+
+VAR i: INTEIRO.
+VAR j: INTEIRO.
+
+PARA(i = 0; i < 10; i = i + 1) {
+    SE(i == 3) {
+        EXIBIR("CONTINUANDO NO CONTINUE").
+        CONTINUAR.
+    }
+        EXIBIR("SAINDO NO CONTINUE").
+
+    SE(i == 7) {
+        EXIBIR("ENTRANDO NO PARA 1").
+        PARAR.
+    }
+
+    EXIBIR("i =", i, " aqui").
+}
+
+EXIBIR("Fim do programa").
+
+
+i=0.
+ENQUANTO(i <= 10) {
+    VAR  j : INTEIRO.
+    VAR AC = i : INTEIRO.
+    EXIBIR(AC).
+    i++.
+}
+
+
+i=0.
+FACA{
+    VAR  j : INTEIRO.
+    VAR AC = i : INTEIRO.
+    EXIBIR(AC).
+    i++.
+}
+
+
+ENQUANTO(i <= 10).

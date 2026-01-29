@@ -1,0 +1,22 @@
+# Teste de Tipos e Validações
+
+# NATURAL não aceita negativos
+VAR n = 10 : NATURAL.
+EXIBIR(n).
+
+# LOGICO
+VAR log = FALSO : LOGICO.
+SE (NAO(log)) {
+    EXIBIR("log é falso").
+}
+
+# Atribuições posteriores
+VAR x : INTEIRO.
+x = 5.
+x = x + 10.
+EXIBIR(x).
+
+VAR realVal : REAL.
+realVal = 10,5.
+realVal = realVal * 2.
+EXIBIR(realVal).

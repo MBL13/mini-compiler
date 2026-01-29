@@ -1,0 +1,22 @@
+VAR numeros = [1; 2; 3; 4; 5]: VECTOR.
+EXIBIR(numeros).
+
+
+VAR lista  = []: VECTOR.
+lista = [10; 20; 30].
+#EXIBIR(lista).
+
+
+
+
+VAR meusValores = [50; 10; 15]: VECTOR.
+VAR total = 0: INTEIRO.
+VAR i = 0: INTEIRO.
+
+i = 0.
+ENQUANTO(i < 3) {
+    total = total + meusValores[i].
+    i++.
+}
+
+EXIBIR(total).

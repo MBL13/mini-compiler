@@ -1,0 +1,4 @@
+VAR a : REAL.
+EXIBIR("Insira o valor de A").
+INSERIR(a).
+EXIBIR("O valor e ", a).

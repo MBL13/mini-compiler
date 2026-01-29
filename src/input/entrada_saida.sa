@@ -1,0 +1,15 @@
+# Teste de Entrada de Dados (INSERIR)
+
+VAR nome : TEXTO.
+INSERIR("Digite o seu nome:", nome).
+EXIBIR(nome).
+
+VAR idade : INTEIRO.
+INSERIR("Qual a sua idade: ", idade).
+EXIBIR("Sua idade é: ",idade, " anos ").
+
+
+VAR preco : REAL.
+INSERIR("Digite um preço (use vírgula):", preco).
+EXIBIR("O preço digitado foi:").
+EXIBIR(preco).

@@ -1,0 +1,8 @@
+VAR t = "Ola" : TEXTO.
+VAR t_err = 10 : TEXTO.
+
+VAR b = VERDADEIRO : LOGICO.
+VAR b_err = "Ola" : LOGICO.
+
+VAR n = 5 : NATURAL.
+VAR n_err = -5 : NATURAL.

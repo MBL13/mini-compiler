@@ -1,0 +1,25 @@
+VAR a = 12 : REAL.
+VAR b = 12 : REAL.
+
+FUNCAO INTEIRO soma(REAL: d, REAL : e) {
+  VAR resultado: REAL.
+  resultado = d + e.
+  RETORNAR resultado.
+}
+EXIBIR(soma(a,12)).
+EXIBIR(resultado).
+
+
+
+FUNCAO LOGICO test() {
+  SE (VERDADEIRO) {
+    RETORNAR FALSO.
+  } SENAO {
+    RETORNAR VERDADEIRO.
+  }
+}
+
+
+VAR resultado  = test(): LOGICO.
+
+EXIBIR("O resultado E:", resultado).

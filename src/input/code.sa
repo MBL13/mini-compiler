@@ -1,0 +1,6 @@
+VAR a = 10 - 3 + 2 : INTEIRO.
+VAR b = 2 + 3 * 4 : INTEIRO.
+VAR c = 10 / 2 + 3 : INTEIRO.
+EXIBIR(a).
+EXIBIR(b).
+EXIBIR(c).

@@ -1,0 +1,13 @@
+VAR num1: REAL.
+VAR num2: REAL.
+VAR contador = 0:INTEIRO.
+
+ INSERIR("DIGITE O 1. NUMERO",num1).
+    INSERIR("DIGITE O LIMITE",num2).
+      
+   ENQUANTO(contador<= num2){
+
+        EXIBIR(num1," X ", contador," = ",(num1*num2)).
+        contador++
+    }
+
