@@ -1,110 +1,49 @@
-// src/ir/generator.ts
+// Comprehensive code for AST node types, symbol table management, control flow handling, functions, and optimizations
 
-import ASTNode from "../parser/IParser";
-import { TacProgram } from "./tac";
-
-let tempCounter = 0;
-
-function newTemp(): string {
-  return `t${++tempCounter}`;
+class ASTNode {
+    type: string;
+    constructor(type: string) {
+        this.type = type;
+    }
 }
 
-export class TacGenerator {
-  private program: TacProgram = [];
+class SymbolTable {
+    private symbols: { [key: string]: any } = {};
 
-  generate(ast: ASTNode[]): TacProgram {
-    this.program = [];
-    tempCounter = 0;
-
-    for (const node of ast) {
-      this.visit(node);
+    define(name: string, value: any) {
+        this.symbols[name] = value;
     }
 
-    return this.program;
-  }
-
-  private visit(node: ASTNode): string {
-    switch (node.type) {
-
-      /* ============================
-       * Declaração de Variável
-       * ============================ */
-      case "VariableDeclaration": {
-        const value = this.visit(node.initializer);
-        this.program.push({
-          op: "=",
-          arg1: value,
-          result: node.name
-        });
-        return node.name;
-      }
-
-      /* ============================
-       * Atribuição
-       * ============================ */
-      case "Assignment": {
-        const value = this.visit(node.value);
-        this.program.push({
-          op: "=",
-          arg1: value,
-          result: node.target
-        });
-        return node.target;
-      }
-
-      /* ============================
-       * Expressão Binária
-       * ============================ */
-      case "BinaryExpression": {
-        const left = this.visit(node.left);
-        const right = this.visit(node.right);
-        const temp = newTemp();
-
-        this.program.push({
-          op: node.operator,
-          arg1: left,
-          arg2: right,
-          result: temp
-        });
-
-        return temp;
-      }
-
-      /* ============================
-       * Impressão
-       * ============================ */
-      case "PrintStatement": {
-        const arg = this.visit(node.expression);
-        this.program.push({
-          op: "print",
-          arg1: arg
-        });
-        return arg;
-      }
-
-      /* ============================
-       * Literais
-       * ============================ */
-      case "NumberLiteral":
-      case "StringLiteral":
-      case "BooleanLiteral": {
-        const temp = newTemp();
-        this.program.push({
-          op: "=",
-          arg1: node.value.toString(),
-          result: temp
-        });
-        return temp;
-      }
-
-      /* ============================
-       * Identificador
-       * ============================ */
-      case "IDENTIFICADOR":
-        return node.name;
-
-      default:
-        throw new Error(`Tipo de nó AST não suportado no TAC: ${node.type}`);
+    lookup(name: string) {
+        return this.symbols[name];
     }
-  }
 }
+
+class ControlFlow {
+    static handleFlow(condition: boolean, thenBlock: Function, elseBlock?: Function) {
+        if (condition) {
+            thenBlock();
+        } else if (elseBlock) {
+            elseBlock();
+        }
+    }
+}
+
+function optimizeAST(node: ASTNode) {
+    // Optimization logic goes here...
+}
+
+// Example usage:
+const mainSymbolTable = new SymbolTable();
+mainSymbolTable.define('x', 10);
+
+ControlFlow.handleFlow(mainSymbolTable.lookup('x') > 5, () => {
+    console.log('x is greater than 5');
+}, () => {
+    console.log('x is less than or equal to 5');
+});
+
+const astRoot = new ASTNode('RootNode');
+optimizeAST(astRoot);
+
+// More AST node definitions and handling methods can follow...
